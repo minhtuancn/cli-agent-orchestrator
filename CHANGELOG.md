@@ -86,7 +86,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- security: enable Jinja2 autoescape in the agent-profile scaffolding `Environment` (`agent_scaffold.py`). Jinja2 defaults to `autoescape=False`, which AppSec scanners flag as an XSS risk. Uses `select_autoescape(enabled_extensions=("html","htm","xml"))` so HTML/XML templates would be escaped while the current markdown/bash `.md.j2` output stays byte-identical
+- security: enable Jinja2 autoescape in the agent-profile scaffolding `Environment` (`agent_scaffold.py`). Jinja2 defaults to `autoescape=False`, which AppSec scanners flag as an XSS risk. Autoescape is now driven by a callable that keys off the template's real extension before the trailing `.j2` (profile templates are named `*.<ext>.j2`), so an HTML/XML template such as `template.html.j2` would be escaped while the current markdown/bash `template.md.j2` renders unescaped and byte-identical
 
 - stop TestPyPI squats breaking the release smoke test (#270)
 

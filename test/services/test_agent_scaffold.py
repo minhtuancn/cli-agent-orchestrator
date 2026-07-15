@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 
 from cli_agent_orchestrator.services.agent_scaffold import (
+    _autoescape_for,
     get_template_schema,
     list_templates,
     render_template,
@@ -195,3 +196,52 @@ class TestRenderTemplate:
     def test_invalid_config_raises(self):
         with pytest.raises(ValueError, match="validation failed"):
             render_template("aws/stepfunction", {"profile": "x"})
+
+    def test_markdown_output_is_not_html_escaped(self):
+        """Autoescape must NOT alter markdown (.md.j2) output: HTML-special
+        characters in config values render verbatim, not as &lt;/&amp;/&#34;.
+        Locks in the byte-identical-output guarantee of the autoescape change.
+        """
+        config = {
+            "profile": "my-profile",
+            "region": "us-east-1",
+            "state_machine_arn": "arn:aws:states:us-east-1:123456789012:stateMachine:MyMachine",
+            "execution_name_prefix": "test-exec",
+            # Free-form field carrying HTML-special chars; rendered verbatim
+            # in the template (- **Input Payload:** ... and the fenced block).
+            "input_payload": '{"q": "a < b && c > d"}',
+            "poll_interval_seconds": 10,
+            "timeout_seconds": 300,
+        }
+        result = render_template("aws/stepfunction", config)
+
+        # Rendered verbatim — no HTML entity encoding introduced by autoescape.
+        assert '{"q": "a < b && c > d"}' in result
+        assert "&lt;" not in result
+        assert "&gt;" not in result
+        assert "&amp;" not in result
+        assert "&#34;" not in result and "&quot;" not in result
+
+
+class TestAutoescapeSelection:
+    """Autoescape keys off the extension BEFORE the trailing ``.j2`` (templates
+    are named ``*.<ext>.j2``); stock select_autoescape would only see ``.j2``.
+    """
+
+    @pytest.mark.parametrize(
+        "name,expected",
+        [
+            ("template.md.j2", False),
+            ("template.md", False),
+            ("template.html.j2", True),
+            ("template.htm.j2", True),
+            ("template.xml.j2", True),
+            ("template.html", True),
+            ("template.HTML.j2", True),  # case-insensitive
+            (None, False),
+            ("", False),
+            ("noextension", False),
+        ],
+    )
+    def test_autoescape_decision(self, name, expected):
+        assert _autoescape_for(name) is expected

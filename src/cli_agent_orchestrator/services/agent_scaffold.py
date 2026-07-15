@@ -10,11 +10,35 @@ import json
 from pathlib import Path
 from typing import Optional
 
-from jinja2 import Environment, FileSystemLoader, select_autoescape
+from jinja2 import Environment, FileSystemLoader
 from jsonschema import Draft202012Validator
 
 # Templates live under src/cli_agent_orchestrator/templates/
 _TEMPLATES_ROOT = Path(__file__).resolve().parent.parent / "templates"
+
+# Template-name extensions whose rendered output must be HTML-escaped. Profile
+# templates follow a ``*.<ext>.j2`` naming convention, so autoescape keys off
+# the extension BEFORE the trailing ``.j2``.
+_AUTOESCAPE_EXTENSIONS = frozenset({"html", "htm", "xml"})
+
+
+def _autoescape_for(template_name: Optional[str]) -> bool:
+    """Decide autoescaping for a template by its real (pre-``.j2``) extension.
+
+    Jinja2's stock ``select_autoescape`` inspects only the final extension,
+    which for our ``*.<ext>.j2`` templates is always ``.j2`` — so it would never
+    enable escaping. Strip a single trailing ``.j2`` first, then escape when the
+    remaining extension is HTML/XML. Markdown/bash templates (``*.md.j2``) render
+    without escaping, so their output is unchanged. ``None`` (string templates
+    built via ``from_string``) defaults to no escaping, matching prior behavior.
+    """
+    if not template_name:
+        return False
+    name = template_name
+    if name.endswith(".j2"):
+        name = name[: -len(".j2")]
+    _, _, ext = name.rpartition(".")
+    return ext.lower() in _AUTOESCAPE_EXTENSIONS
 
 
 def _check_containment(path: Path, root: Path) -> None:
@@ -122,19 +146,19 @@ def render_template(template_name: str, config: dict) -> str:
         )
 
     # Templates use {{ config.x }} for values and bash ${VAR} passes through
-    # unchanged (not Jinja2 syntax). Autoescape is enabled via
-    # select_autoescape so it is never off by default (Jinja2's own default is
-    # autoescape=False, flagged by security scanners as an XSS risk). The
-    # scaffold renders markdown/bash profile files, not HTML, so escaping only
-    # engages for HTML/XML template extensions — should such a template ever be
-    # added, its output is escaped; the current .md.j2 output is byte-identical.
+    # unchanged (not Jinja2 syntax). Autoescape is explicitly enabled so it is
+    # never off by default (Jinja2's own default is autoescape=False, which
+    # security scanners flag as an XSS risk). Templates follow a ``*.<ext>.j2``
+    # naming convention, so the meaningful type is the extension BEFORE the
+    # trailing ``.j2`` — stock ``select_autoescape`` only inspects the final
+    # extension (always ``.j2``) and would never engage. ``_autoescape_for``
+    # strips the ``.j2`` first, so an HTML/XML profile template (e.g.
+    # ``template.html.j2``) would be escaped, while the current markdown/bash
+    # ``template.md.j2`` is not — its output stays byte-identical.
     env = Environment(
         loader=FileSystemLoader(str(template_dir)),
         keep_trailing_newline=True,
-        autoescape=select_autoescape(
-            enabled_extensions=("html", "htm", "xml"),
-            default_for_string=False,
-        ),
+        autoescape=_autoescape_for,
     )
     template = env.get_template("template.md.j2")
 
