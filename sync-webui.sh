@@ -13,8 +13,9 @@ set -euo pipefail
 BUILD_DIR="/home/dev/cao-web-patch"
 PORT=9889
 HOST="0.0.0.0"
-# IP máy để whitelist DNS-rebinding (sửa nếu IP đổi)
-ALLOWED_HOSTS="localhost,127.0.0.1,10.20.10.103,113.189.249.218"
+# IP máy + domain công khai (NPM Proxy + Let's Encrypt) để whitelist DNS-rebinding.
+# Thêm domain bạn trỏ tới (VD agent.go7s.net) nếu chưa có.
+ALLOWED_HOSTS="localhost,127.0.0.1,10.20.10.103,113.189.249.218,agent.go7s.net"
 WS_CLIENTS="*"
 
 echo "==> [1/4] Tìm đường dẫn package web_ui ..."
