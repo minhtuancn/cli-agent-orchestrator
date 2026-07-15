@@ -7,18 +7,14 @@ import { AgentPanel } from './components/AgentPanel'
 import { FlowsPanel } from './components/FlowsPanel'
 import { MemoryPanel } from './components/MemoryPanel'
 import { SettingsPanel } from './components/SettingsPanel'
-import { Bot, Home, Clock, Settings, Brain, CheckCircle, XCircle, Info, Wifi, WifiOff } from 'lucide-react'
+import { LoginScreen } from './components/LoginScreen'
+import { useAuth } from './auth/AuthContext'
+import { useI18n, LanguageSwitcher } from './i18n'
+import { Bot, Home, Clock, Settings, Brain, CheckCircle, XCircle, Info, Wifi, WifiOff, LogOut } from 'lucide-react'
+import { LanguageProvider } from './i18n'
+import { AuthProvider } from './auth/AuthContext'
 
 type TabKey = 'home' | 'agents' | 'flows' | 'settings' | 'memory'
-
-// Memory appended last so Alt+N numbering of existing tabs never shifts
-const TABS: { key: TabKey; label: string; icon: React.ReactNode }[] = [
-  { key: 'home', label: 'Home', icon: <Home size={16} /> },
-  { key: 'agents', label: 'Agents', icon: <Bot size={16} /> },
-  { key: 'flows', label: 'Flows', icon: <Clock size={16} /> },
-  { key: 'settings', label: 'Settings', icon: <Settings size={16} /> },
-  { key: 'memory', label: 'Memory', icon: <Brain size={16} /> },
-]
 
 function Snackbar() {
   const { snackbar, hideSnackbar } = useStore()
@@ -51,18 +47,30 @@ function Snackbar() {
   )
 }
 
-export default function App() {
+function AppShell() {
   const [tab, setTab] = useState<TabKey>('home')
   // Default false (fail-closed): a dead backend hides the tab rather than showing a broken panel
   const [memoryEnabled, setMemoryEnabled] = useState(false)
   const { sessions, connected, fetchSessions } = useStore()
+  const { authenticated, loading, logout } = useAuth()
+  const { t } = useI18n()
 
-  const visibleTabs = TABS.filter(t => t.key !== 'memory' || memoryEnabled)
+  // Memory appended last so Alt+N numbering of existing tabs never shifts
+  const TABS: { key: TabKey; label: string; icon: React.ReactNode }[] = [
+    { key: 'home', label: t.nav.home, icon: <Home size={16} /> },
+    { key: 'agents', label: t.nav.agents, icon: <Bot size={16} /> },
+    { key: 'flows', label: t.nav.flows, icon: <Clock size={16} /> },
+    { key: 'settings', label: t.nav.settings, icon: <Settings size={16} /> },
+    { key: 'memory', label: t.nav.memory, icon: <Brain size={16} /> },
+  ]
+
+  const visibleTabs = TABS.filter((tt) => tt.key !== 'memory' || memoryEnabled)
 
   useEffect(() => {
     fetchSessions()
-    api.getMemoryStatus()
-      .then(s => setMemoryEnabled(s.enabled))
+    api
+      .getMemoryStatus()
+      .then((s) => setMemoryEnabled(s.enabled))
       .catch(() => {})
     const interval = setInterval(fetchSessions, 10000)
     return () => clearInterval(interval)
@@ -80,29 +88,54 @@ export default function App() {
     return () => window.removeEventListener('keydown', handler)
   }, [memoryEnabled])
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0f0f14] text-gray-400 flex items-center justify-center text-sm">
+        {t.common.loading}
+      </div>
+    )
+  }
+
+  if (!authenticated) {
+    return <LoginScreen />
+  }
+
   return (
     <div className="min-h-screen bg-[#0f0f14] text-gray-200">
       {/* Header */}
       <header className="border-b border-gray-800 bg-gray-900/80 backdrop-blur-sm sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center shrink-0">
               <Bot size={18} className="text-white" />
             </div>
-            <h1 className="text-lg font-bold text-white">CLI Agent Orchestrator</h1>
+            <h1 className="text-lg font-bold text-white truncate">{t.appTitle}</h1>
           </div>
-          <div className="flex items-center gap-4">
-            <span className="text-xs text-gray-500">{sessions.length} session{sessions.length !== 1 ? 's' : ''}</span>
-            <div className="flex items-center gap-1.5" title={connected ? 'Connected' : 'Disconnected'}>
+          <div className="flex items-center gap-3 sm:gap-4 shrink-0">
+            <span className="hidden sm:inline text-xs text-gray-500">
+              {sessions.length} {t.header.sessions}
+              {sessions.length !== 1 ? 's' : ''}
+            </span>
+            <div className="flex items-center gap-1.5" title={connected ? t.header.live : t.header.offline}>
               {connected ? (
                 <Wifi size={14} className="text-emerald-400" />
               ) : (
                 <WifiOff size={14} className="text-red-400" />
               )}
-              <span className={`text-xs ${connected ? 'text-emerald-400' : 'text-red-400'}`}>
-                {connected ? 'Live' : 'Offline'}
+              <span className={`hidden sm:inline text-xs ${connected ? 'text-emerald-400' : 'text-red-400'}`}>
+                {connected ? t.header.live : t.header.offline}
               </span>
             </div>
+            <LanguageSwitcher />
+            <button
+              type="button"
+              onClick={() => logout()}
+              title={t.logout}
+              className="flex items-center gap-1 px-2 py-1 rounded-md text-xs text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
+            >
+              <LogOut size={14} />
+              <span className="hidden sm:inline">{t.logout}</span>
+            </button>
           </div>
         </div>
       </header>
@@ -111,23 +144,23 @@ export default function App() {
       <div className="border-b border-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <nav className="flex gap-1 py-2 overflow-x-auto" role="tablist">
-            {visibleTabs.map((t, i) => (
+            {visibleTabs.map((tt, i) => (
               <button
-                key={t.key}
+                key={tt.key}
                 role="tab"
-                aria-selected={tab === t.key}
-                onClick={() => setTab(t.key)}
+                aria-selected={tab === tt.key}
+                onClick={() => setTab(tt.key)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 shrink-0 whitespace-nowrap ${
-                  tab === t.key
+                  tab === tt.key
                     ? 'bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-lg shadow-emerald-500/20'
                     : 'text-gray-400 hover:text-white hover:bg-gray-800/50'
                 }`}
                 title={`Alt+${i + 1}`}
               >
-                {t.icon}
-                {t.label}
-                {t.key === 'agents' && sessions.length > 0 && (
-                  <span className={`px-1.5 py-0.5 text-xs rounded-full ${tab === t.key ? 'bg-white/20' : 'bg-gray-700'}`}>
+                {tt.icon}
+                {tt.label}
+                {tt.key === 'agents' && sessions.length > 0 && (
+                  <span className={`px-1.5 py-0.5 text-xs rounded-full ${tab === tt.key ? 'bg-white/20' : 'bg-gray-700'}`}>
                     {sessions.length}
                   </span>
                 )}
@@ -138,10 +171,10 @@ export default function App() {
       </div>
 
       {/* Content */}
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
         <ErrorBoundary>
-          <Suspense fallback={<div className="text-gray-500 text-sm py-12 text-center">Loading...</div>}>
-            {tab === 'home' && <DashboardHome onNavigate={(t) => setTab(t as TabKey)} />}
+          <Suspense fallback={<div className="text-gray-500 text-sm py-12 text-center">{t.common.loading}</div>}>
+            {tab === 'home' && <DashboardHome onNavigate={(tt) => setTab(tt as TabKey)} />}
             {tab === 'agents' && <AgentPanel />}
             {tab === 'flows' && <FlowsPanel />}
             {tab === 'settings' && <SettingsPanel />}
@@ -152,5 +185,15 @@ export default function App() {
 
       <Snackbar />
     </div>
+  )
+}
+
+export default function App() {
+  return (
+    <LanguageProvider>
+      <AuthProvider>
+        <AppShell />
+      </AuthProvider>
+    </LanguageProvider>
   )
 }

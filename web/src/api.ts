@@ -1,10 +1,21 @@
 const BASE = ''  // Vite proxy handles routing to backend
 
+// Called when the backend rejects a request with 401 (session expired/invalid).
+// AuthProvider wires this to force the login screen.
+let unauthorizedHandler: (() => void) | null = null
+export function setUnauthorizedHandler(fn: (() => void) | null) {
+  unauthorizedHandler = fn
+}
+
 async function fetchJSON<T>(url: string, opts?: RequestInit & { timeoutMs?: number }): Promise<T> {
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), opts?.timeoutMs ?? 10000)
   try {
-    const res = await fetch(`${BASE}${url}`, { ...opts, signal: controller.signal })
+    const res = await fetch(`${BASE}${url}`, { ...opts, credentials: 'include', signal: controller.signal })
+    if (res.status === 401) {
+      unauthorizedHandler?.()
+      throw new Error('401 Unauthorized')
+    }
     if (!res.ok) throw new Error(`${res.status} ${res.statusText}`)
     return res.json()
   } finally {
@@ -114,6 +125,17 @@ export interface MemoryDetail extends MemorySummary {
 }
 
 export const api = {
+  // Admin auth
+  login: (password: string) =>
+    fetchJSON<{ ok: boolean }>('/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password }),
+      timeoutMs: 10000,
+    }),
+  logout: () => fetchJSON<{ ok: boolean }>('/auth/logout', { method: 'POST', timeoutMs: 10000 }),
+  me: () => fetchJSON<{ authenticated: boolean }>('/auth/me'),
+
   // Agent Profiles & Providers
   listProfiles: () => fetchJSON<AgentProfileInfo[]>('/agents/profiles'),
   listProviders: () => fetchJSON<ProviderInfo[]>('/agents/providers'),

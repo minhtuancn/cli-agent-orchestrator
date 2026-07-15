@@ -42,6 +42,21 @@ rm -f "$PKG_WEBUI"/assets/*
 cp -r "$SRC_WEBUI"/. "$PKG_WEBUI"/
 echo "    mới: $(grep -o '/assets/index-[A-Za-z0-9_]*\.js' "$PKG_WEBUI/index.html")"
 
+echo "==> [3b] Copy backend patch (api/main.py) vào package đang cài ..."
+PKG_DIR="$("$VENV_PY" - <<'PY'
+import os, cli_agent_orchestrator as m
+print(os.path.dirname(m.__file__))
+PY
+)"
+SRC_MAIN="$BUILD_DIR/src/cli_agent_orchestrator/api/main.py"
+if [ -f "$SRC_MAIN" ]; then
+  cp -f "$SRC_MAIN" "$PKG_DIR/api/main.py"
+  rm -f "$PKG_DIR/api/__pycache__/main"*.pyc 2>/dev/null || true
+  echo "    patched: $PKG_DIR/api/main.py"
+else
+  echo "    CẢNH BÁO: không tìm thấy $SRC_MAIN (bỏ qua backend patch)"
+fi
+
 echo "==> [4/4] Restart cao-server (kill theo port $PORT) ..."
 PID="$(ss -ltnp 2>/dev/null | grep ":$PORT" | grep -o 'pid=[0-9]*' | head -1 | cut -d= -f2 || true)"
 if [ -n "${PID:-}" ]; then

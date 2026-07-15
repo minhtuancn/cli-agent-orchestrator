@@ -3,6 +3,7 @@ import { api, MemorySummary, MemoryDetail } from '../api'
 import { useStore } from '../store'
 import { ConfirmModal } from './ConfirmModal'
 import { Brain, Search, Trash2, ChevronDown, ChevronRight } from 'lucide-react'
+import { useI18n } from '../i18n'
 import { CustomSelect } from './CustomSelect'
 
 const SCOPE_OPTIONS = [
@@ -34,6 +35,7 @@ function rowId(m: MemorySummary): string {
 }
 
 export function MemoryPanel() {
+  const { t } = useI18n()
   const { showSnackbar } = useStore()
 
   // Memory list state
@@ -160,16 +162,16 @@ export function MemoryPanel() {
       <div className="bg-gray-800/60 border border-gray-700/50 rounded-xl p-5">
         <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
           <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wide">
-            Memories ({filtered.length})
+            {t.memory.memories} ({filtered.length})
           </h3>
           <button
             onClick={() => setPendingClear(scopeFilter)}
             disabled={!scopeFilter}
             className="flex items-center gap-2 bg-red-600 hover:bg-red-500 disabled:opacity-40 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
-            title={scopeFilter ? `Clear all ${scopeFilter} memories` : 'Select a scope filter to enable'}
+            title={scopeFilter ? t.memory.clearAll.replace('{scope}', scopeFilter) : t.memory.selectScope}
           >
             <Trash2 size={14} />
-            Clear scope…
+             {t.memory.clearScope}
           </button>
         </div>
 
@@ -193,7 +195,7 @@ export function MemoryPanel() {
               type="text"
               value={search}
               onChange={e => setSearch(e.target.value)}
-              placeholder="Filter keys..."
+               placeholder={`${t.common.filter} keys...`}
               className="bg-gray-900 border border-gray-700 text-gray-200 text-xs rounded-lg pl-8 pr-3 py-1.5 w-full sm:w-48 focus:border-emerald-500 focus:outline-none"
             />
           </div>
@@ -282,15 +284,15 @@ export function MemoryPanel() {
       {/* Delete Confirmation Modal */}
       <ConfirmModal
         open={!!pendingDelete}
-        title="Delete Memory"
+         title={t.memory.delete}
         message="This will permanently remove the memory and its history. This action cannot be undone."
         details={pendingDelete ? [
-          { label: 'Key', value: pendingDelete.key },
-          { label: 'Scope', value: pendingDelete.scope },
+          { label: t.memory.key, value: pendingDelete.key },
+          { label: t.memory.scope, value: pendingDelete.scope },
           { label: 'Scope ID', value: pendingDelete.scope_id || 'n/a' },
-          { label: 'Type', value: pendingDelete.memory_type },
+          { label: t.memory.type, value: pendingDelete.memory_type },
         ] : []}
-        confirmLabel="Delete Memory"
+         confirmLabel={t.memory.delete}
         variant="danger"
         loading={busy}
         onConfirm={handleDelete}

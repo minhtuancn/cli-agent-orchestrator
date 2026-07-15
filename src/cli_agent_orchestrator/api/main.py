@@ -11,6 +11,9 @@ import signal
 import struct
 import subprocess
 import termios
+import hmac
+import secrets
+import time
 from contextlib import asynccontextmanager
 from datetime import datetime
 from pathlib import Path
@@ -24,6 +27,7 @@ from fastapi import (
     HTTPException,
     Query,
     Request,
+    Response,
     WebSocket,
     WebSocketDisconnect,
     status,
@@ -33,6 +37,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
+from starlette.middleware.base import BaseHTTPMiddleware
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 from cli_agent_orchestrator.backends import TerminalBackendError, TerminalNotFoundError
@@ -601,6 +606,85 @@ app.add_middleware(
 )
 
 
+# ===========================================================================
+# Simple admin password session auth.
+#
+# Motivation: cao-server ships with NO authentication and the terminal
+# WebSocket is a full PTY (RCE). When the server is exposed to the internet
+# behind a reverse proxy (e.g. Nginx Proxy Manager + Let's Encrypt) the
+# web UI and every REST API + the terminal WebSocket MUST be gated.
+#
+# Design:
+#   * The SPA shell (index.html + /assets/*) and the auth endpoints are
+#     reachable WITHOUT a session so the login screen can load.
+#   * Every other request (REST API) and the terminal WebSocket require a
+#     valid session cookie (HttpOnly, Secure behind TLS, SameSite=Lax).
+#   * The password is compared in constant time. Default password is
+#     overridable via the CAO_ADMIN_PASS env var.
+#   * Sessions live in-process (lost on restart -> re-login). Fine for a
+#     single-admin dev panel.
+# ===========================================================================
+ADMIN_PASSWORD = os.getenv("CAO_ADMIN_PASS", "Vkn@1234561")
+SESSION_TTL = int(os.getenv("CAO_SESSION_TTL", "86400"))  # seconds
+_SESSIONS: "dict[str, float]" = {}  # token -> expiry epoch
+
+
+def _issue_session() -> str:
+    token = secrets.token_urlsafe(32)
+    _SESSIONS[token] = time.time() + SESSION_TTL
+    return token
+
+
+def _valid_session(token: "Optional[str]") -> bool:
+    if not token:
+        return False
+    exp = _SESSIONS.get(token)
+    if exp is None:
+        return False
+    if exp < time.time():
+        _SESSIONS.pop(token, None)
+        return False
+    return True
+
+
+def _destroy_session(token: "Optional[str]") -> None:
+    if token:
+        _SESSIONS.pop(token, None)
+
+
+def _is_secure_req(request: Request) -> bool:
+    # Behind a TLS-terminating reverse proxy the scheme is http; trust the
+    # forwarded proto header so the Set-Cookie "Secure" flag is correct.
+    return request.headers.get("x-forwarded-proto", "http").lower() == "https"
+
+
+# Paths reachable WITHOUT a session (login UI + auth endpoints).
+_AUTH_PUBLIC_EXACT = frozenset(
+    {"", "/", "/index.html", "/auth/login", "/auth/logout", "/auth/me"}
+)
+_AUTH_PUBLIC_PREFIX = ("/assets/", "/favicon", "/vite.svg", "/.well-known/")
+
+
+def _is_public_path(path: str) -> bool:
+    if path in _AUTH_PUBLIC_EXACT:
+        return True
+    return any(path.startswith(p) for p in _AUTH_PUBLIC_PREFIX)
+
+
+class _AuthMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        if _is_public_path(request.url.path):
+            return await call_next(request)
+        if _valid_session(request.cookies.get("cao_sid")):
+            return await call_next(request)
+        # Any API call without a valid session -> 401 so the SPA redirects.
+        return JSONResponse(status_code=401, content={"detail": "unauthorized"})
+
+
+# Added last => outermost => runs first on inbound requests (fail-closed gate).
+app.add_middleware(_AuthMiddleware)
+
+
 @app.exception_handler(RequestValidationError)
 async def _redact_env_vars_validation_error(
     request: Request, exc: RequestValidationError
@@ -652,6 +736,50 @@ async def oauth_protected_resource_metadata():
         "scopes_supported": SCOPES_SUPPORTED,
         "bearer_methods_supported": ["header"],
     }
+
+
+# ===========================================================================
+# Admin auth endpoints (see _AuthMiddleware above for the gating logic).
+# ===========================================================================
+class _LoginRequest(BaseModel):
+    password: str
+
+
+@app.post("/auth/login")
+async def auth_login(request: Request, body: _LoginRequest):
+    """Validate the admin password and issue an HttpOnly session cookie."""
+    if hmac.compare_digest(body.password, ADMIN_PASSWORD):
+        token = _issue_session()
+        resp = JSONResponse({"ok": True})
+        resp.set_cookie(
+            "cao_sid",
+            token,
+            httponly=True,
+            secure=_is_secure_req(request),
+            samesite="lax",
+            path="/",
+            max_age=SESSION_TTL,
+        )
+        return resp
+    return JSONResponse(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        content={"ok": False, "error": "invalid_password"},
+    )
+
+
+@app.post("/auth/logout")
+async def auth_logout(request: Request):
+    """Destroy the session and clear the cookie."""
+    _destroy_session(request.cookies.get("cao_sid"))
+    resp = JSONResponse({"ok": True})
+    resp.delete_cookie("cao_sid", path="/")
+    return resp
+
+
+@app.get("/auth/me")
+async def auth_me(request: Request):
+    """Return whether the caller currently holds a valid session."""
+    return {"authenticated": _valid_session(request.cookies.get("cao_sid"))}
 
 
 @app.get("/health")
@@ -2035,6 +2163,13 @@ async def terminal_ws(websocket: WebSocket, terminal_id: str):
         and client_host not in WS_ALLOWED_CLIENTS
     ):
         await websocket.close(code=4003, reason="WebSocket access is restricted to allowed clients")
+        return
+
+    # Session auth: the IP allowlist above only restricts by source IP. Behind
+    # a reverse proxy every client shares the proxy IP, so a token check is
+    # required to actually gate this full-PTY endpoint.
+    if not _valid_session(websocket.cookies.get("cao_sid")):
+        await websocket.close(code=4401, reason="Unauthorized")
         return
 
     await websocket.accept()

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { api, AgentDirsSettings } from '../api'
 import { useStore } from '../store'
 import { FolderOpen, Plus, X, RefreshCw } from 'lucide-react'
+import { useI18n } from '../i18n'
 
 /** A small on/off switch (GH #280). */
 function Toggle({ on, onClick, disabled, label }: {
@@ -10,6 +11,7 @@ function Toggle({ on, onClick, disabled, label }: {
   disabled?: boolean
   label: string
 }) {
+  const { t } = useI18n()
   return (
     <button
       type="button"
@@ -18,7 +20,7 @@ function Toggle({ on, onClick, disabled, label }: {
       aria-label={label}
       onClick={onClick}
       disabled={disabled}
-      title={on ? 'Enabled — click to skip this directory' : 'Disabled — click to scan this directory'}
+      title={on ? t.common.enabled : t.common.disabled}
       className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors disabled:opacity-50 ${
         on ? 'bg-emerald-600' : 'bg-gray-600'
       }`}
@@ -33,6 +35,7 @@ function Toggle({ on, onClick, disabled, label }: {
 }
 
 export function SettingsPanel() {
+  const { t } = useI18n()
   const [settings, setSettings] = useState<AgentDirsSettings | null>(null)
   const [newDir, setNewDir] = useState('')
   const [busy, setBusy] = useState(false)
@@ -135,13 +138,13 @@ export function SettingsPanel() {
         {isDefault && (
           <span className="text-[10px] uppercase tracking-wide text-gray-500 shrink-0">default</span>
         )}
-        <Toggle on={!off} onClick={() => toggle(dir)} disabled={busy} label={`Enable ${dir}`} />
+        <Toggle on={!off} onClick={() => toggle(dir)} disabled={busy} label={`${t.settings.toggle} ${dir}`} />
         {!isDefault && (
           <button
             onClick={() => removeDir(dir)}
             disabled={busy}
             className="text-gray-500 hover:text-red-400 transition-colors shrink-0 disabled:opacity-40"
-            title="Remove directory"
+            title={t.settings.removeDir}
             aria-label={`Remove ${dir}`}
           >
             <X size={14} />
@@ -156,7 +159,7 @@ export function SettingsPanel() {
       <div className="bg-gray-800/60 border border-gray-700/50 rounded-xl p-5">
         <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
           <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wide">
-            Agent Profile Directories
+            {t.settings.agentProfileDirs}
           </h3>
           {profileCount !== null && (
             <span className="text-xs text-gray-500" data-testid="profile-count">
@@ -173,12 +176,12 @@ export function SettingsPanel() {
 
         {defaultDirs.length > 0 && (
           <>
-            <div className="text-[10px] uppercase tracking-wide text-gray-500 mb-2">Built-in</div>
+            <div className="text-[10px] uppercase tracking-wide text-gray-500 mb-2">{t.settings.builtIn}</div>
             <div className="space-y-2 mb-4">{defaultDirs.map(d => row(d, true))}</div>
           </>
         )}
 
-        <div className="text-[10px] uppercase tracking-wide text-gray-500 mb-2">Custom</div>
+            <div className="text-[10px] uppercase tracking-wide text-gray-500 mb-2">{t.settings.custom}</div>
         {extraDirs.length > 0 ? (
           <div className="space-y-2 mb-4">{extraDirs.map(d => row(d, false))}</div>
         ) : (
@@ -202,7 +205,7 @@ export function SettingsPanel() {
             disabled={!newDir.trim() || busy}
             className="flex items-center gap-1.5 bg-gray-700 hover:bg-gray-600 disabled:opacity-40 text-white text-sm px-4 py-2.5 rounded-lg transition-colors"
           >
-            <Plus size={14} /> Add
+            <Plus size={14} /> {t.settings.addDirectory}
           </button>
         </div>
 
@@ -219,7 +222,7 @@ export function SettingsPanel() {
           onClick={() => { refreshProfiles(); showSnackbar({ type: 'info', message: 'Refreshing profiles...' }) }}
           className="flex items-center gap-2 bg-gray-700 hover:bg-gray-600 text-white text-sm px-4 py-2.5 rounded-lg transition-colors"
         >
-          <RefreshCw size={14} /> Refresh Profiles
+          <RefreshCw size={14} /> {t.common.refresh} Profiles
         </button>
       </div>
     </div>

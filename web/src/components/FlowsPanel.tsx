@@ -4,6 +4,7 @@ import { useStore } from '../store'
 import { ConfirmModal } from './ConfirmModal'
 import { Clock, Play, Trash2, Plus, ChevronDown, ChevronRight, Loader2, X } from 'lucide-react'
 import { CustomSelect } from './CustomSelect'
+import { useI18n } from '../i18n'
 
 const SCHEDULE_PRESETS = [
   { label: 'Every 5 minutes', cron: '*/5 * * * *' },
@@ -23,6 +24,7 @@ function cronToLabel(cron: string): string {
 }
 
 export function FlowsPanel() {
+  const { t } = useI18n()
   const { showSnackbar } = useStore()
 
   // Flow list state
@@ -170,21 +172,21 @@ export function FlowsPanel() {
       <div className="bg-gray-800/60 border border-gray-700/50 rounded-xl p-5">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wide">
-            Automated Flows ({flows.length})
+            {t.flows.automated} ({flows.length})
           </h3>
           <button
             onClick={() => { resetForm(); setShowCreateModal(true) }}
             className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
           >
             <Plus size={14} />
-            Create Flow
+            {t.flows.newFlow}
           </button>
         </div>
 
         {flows.length === 0 ? (
           <div className="text-center py-8">
             <Clock size={32} className="mx-auto text-gray-600 mb-3" />
-            <p className="text-gray-500 text-sm">No flows configured.</p>
+             <p className="text-gray-500 text-sm">{t.flows.empty}</p>
             <p className="text-gray-600 text-xs mt-1">
               Click "Create Flow" above or use the CLI: <code className="text-emerald-400">cao schedule add &lt;file.md&gt;</code>
             </p>
@@ -221,7 +223,7 @@ export function FlowsPanel() {
                       className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
                         f.enabled ? 'bg-emerald-600' : 'bg-gray-600'
                       } ${togglingFlow === f.name ? 'opacity-50' : ''}`}
-                      title={f.enabled ? 'Disable flow' : 'Enable flow'}
+                      title={f.enabled ? t.flows.disable : t.flows.enable}
                     >
                       {togglingFlow === f.name ? (
                         <Loader2 size={12} className="absolute left-1/2 -translate-x-1/2 animate-spin text-white" />
@@ -280,7 +282,7 @@ export function FlowsPanel() {
                     </div>
                     {f.prompt_template && (
                       <div>
-                        <div className="text-[11px] text-gray-500 uppercase tracking-wider mb-1.5">Prompt</div>
+                        <div className="text-[11px] text-gray-500 uppercase tracking-wider mb-1.5">{t.flows.promptLabel}</div>
                         <div className="bg-gray-950/60 border border-gray-700/30 rounded-lg p-3 text-sm text-gray-300 font-mono whitespace-pre-wrap leading-relaxed max-h-48 overflow-y-auto">
                           {f.prompt_template}
                         </div>
@@ -302,9 +304,9 @@ export function FlowsPanel() {
             {/* Modal header */}
             <div className="flex items-center justify-between p-5 border-b border-gray-700/50">
               <div>
-                <h3 className="text-base font-semibold text-gray-200">Create Flow</h3>
+                 <h3 className="text-base font-semibold text-gray-200">{t.flows.newFlow}</h3>
                 <p className="text-xs text-gray-500 mt-1">
-                  Schedule an agent to run automatically on a recurring basis.
+                  {t.flows.subtitle}
                 </p>
               </div>
               <button
@@ -318,7 +320,7 @@ export function FlowsPanel() {
             {/* Modal body */}
             <div className="p-5 space-y-4">
               <div>
-                <label className="block text-xs text-gray-500 mb-1">Name</label>
+                 <label className="block text-xs text-gray-500 mb-1">{t.flows.name}</label>
                 <input
                   type="text"
                   value={name}
@@ -330,7 +332,7 @@ export function FlowsPanel() {
               </div>
 
               <div>
-                <label className="block text-xs text-gray-500 mb-1">Schedule</label>
+                 <label className="block text-xs text-gray-500 mb-1">{t.flows.schedule}</label>
                 <CustomSelect
                   value={scheduleMode === 'custom' ? CUSTOM_CRON_VALUE : schedule}
                   onChange={val => {
@@ -364,7 +366,7 @@ export function FlowsPanel() {
 
               <div className="flex gap-3">
                 <div className="flex-1">
-                  <label className="block text-xs text-gray-500 mb-1">Agent Profile</label>
+                   <label className="block text-xs text-gray-500 mb-1">{t.agents.agentProfile}</label>
                   {profiles.length > 0 ? (
                     <CustomSelect
                       value={agentProfile}
@@ -387,7 +389,7 @@ export function FlowsPanel() {
                   )}
                 </div>
                 <div className="flex-1">
-                  <label className="block text-xs text-gray-500 mb-1">Provider</label>
+                   <label className="block text-xs text-gray-500 mb-1">{t.agents.provider}</label>
                   <CustomSelect
                     value={provider}
                     onChange={setProvider}
@@ -403,7 +405,7 @@ export function FlowsPanel() {
               </div>
 
               <div>
-                <label className="block text-xs text-gray-500 mb-1">Prompt</label>
+                 <label className="block text-xs text-gray-500 mb-1">{t.flows.promptLabel}</label>
                 <textarea
                   value={promptTemplate}
                   onChange={e => setPromptTemplate(e.target.value)}
@@ -420,7 +422,7 @@ export function FlowsPanel() {
                 onClick={() => setShowCreateModal(false)}
                 className="px-4 py-2 text-sm text-gray-400 hover:text-gray-200 transition-colors"
               >
-                Cancel
+                 {t.common.cancel}
               </button>
               <button
                 onClick={handleCreate}
@@ -428,7 +430,7 @@ export function FlowsPanel() {
                 className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors"
               >
                 {creating ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
-                {creating ? 'Creating...' : 'Create Flow'}
+                 {creating ? t.flows.creating : t.flows.newFlow}
               </button>
             </div>
           </div>

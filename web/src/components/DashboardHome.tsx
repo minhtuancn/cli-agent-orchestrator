@@ -7,6 +7,7 @@ import { ConfirmModal } from './ConfirmModal'
 import { InboxPanel } from './InboxPanel'
 import { StatusBadge, STATUS_CONFIG } from './StatusBadge'
 import { OutputViewer } from './OutputViewer'
+import { useI18n } from '../i18n'
 
 const STATUS_ORDER = ['PROCESSING', 'IDLE', 'WAITING_USER_ANSWER', 'ERROR', 'COMPLETED', 'UNKNOWN']
 
@@ -71,6 +72,7 @@ interface SessionWithTerminals {
 }
 
 export function DashboardHome({ onNavigate }: { onNavigate: (tab: string) => void }) {
+  const { t } = useI18n()
   const { sessions, terminalStatuses, setTerminalStatus, clearTerminalStatuses, showSnackbar, deleteSession } = useStore()
   const [profileCount, setProfileCount] = useState(0)
   const [sessionData, setSessionData] = useState<SessionWithTerminals[]>([])
@@ -248,7 +250,7 @@ export function DashboardHome({ onNavigate }: { onNavigate: (tab: string) => voi
             </div>
             <div>
               <div className="text-2xl font-bold text-white">{sessions.length}</div>
-              <div className="text-xs text-gray-400 uppercase tracking-wide">Sessions</div>
+              <div className="text-xs text-gray-400 uppercase tracking-wide">{t.home.sessions}</div>
             </div>
           </div>
         </div>
@@ -259,7 +261,7 @@ export function DashboardHome({ onNavigate }: { onNavigate: (tab: string) => voi
             </div>
             <div>
               <div className="text-2xl font-bold text-white">{totalTerminals}</div>
-              <div className="text-xs text-gray-400 uppercase tracking-wide">Running Agents</div>
+              <div className="text-xs text-gray-400 uppercase tracking-wide">{t.home.runningAgents}</div>
             </div>
           </div>
         </div>
@@ -270,7 +272,7 @@ export function DashboardHome({ onNavigate }: { onNavigate: (tab: string) => voi
             </div>
             <div>
               <div className="text-2xl font-bold text-white">{profileCount}</div>
-              <div className="text-xs text-gray-400 uppercase tracking-wide">Profiles</div>
+              <div className="text-xs text-gray-400 uppercase tracking-wide">{t.home.profiles}</div>
             </div>
           </div>
         </div>
@@ -279,10 +281,10 @@ export function DashboardHome({ onNavigate }: { onNavigate: (tab: string) => voi
       {/* Quick Actions */}
       <div className="flex gap-3 flex-wrap">
         <button onClick={() => onNavigate('agents')} className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition-colors">
-          <Bot size={16} /> Spawn Agent
+          <Bot size={16} /> {t.agents.spawnAgent}
         </button>
         <button onClick={() => onNavigate('flows')} className="flex items-center gap-2 bg-gray-700 hover:bg-gray-600 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition-colors">
-          <Zap size={16} /> Manage Flows
+          <Zap size={16} /> {t.home.manageFlows}
         </button>
       </div>
 
@@ -290,7 +292,7 @@ export function DashboardHome({ onNavigate }: { onNavigate: (tab: string) => voi
       <div className="mb-1">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wide">Active Sessions</h3>
+            <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wide">{t.home.activeSessions}</h3>
             <p className="text-xs text-gray-500 mt-1">
               Each session is a workspace where one or more AI agents run and collaborate.
             </p>
@@ -334,7 +336,7 @@ export function DashboardHome({ onNavigate }: { onNavigate: (tab: string) => voi
           <Bot size={32} className="mx-auto text-gray-600 mb-3" />
           {sessionData.length === 0 ? (
             <>
-              <p className="text-gray-400 text-sm">No active sessions.</p>
+              <p className="text-gray-400 text-sm">{t.home.noSessions}</p>
               <p className="text-gray-600 text-xs mt-1">Go to the <span className="text-emerald-400 cursor-pointer" onClick={() => onNavigate('agents')}>Agents tab</span> to spawn your first agent.</p>
             </>
           ) : (

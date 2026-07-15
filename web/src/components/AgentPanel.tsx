@@ -9,6 +9,7 @@ import { CustomSelect, SelectOption } from './CustomSelect'
 import { TerminalMeta } from '../api'
 import { StatusBadge } from './StatusBadge'
 import { OutputViewer } from './OutputViewer'
+import { useI18n } from '../i18n'
 
 export const FALLBACK_PROVIDERS = ['kiro_cli', 'claude_code', 'q_cli', 'codex', 'gemini_cli', 'hermes', 'kimi_cli', 'copilot_cli', 'opencode_cli', 'cursor_cli']
 
@@ -21,6 +22,7 @@ const SOURCE_LABELS: Record<string, string> = {
 }
 
 export function AgentPanel() {
+  const { t } = useI18n()
   const { sessions, fetchSessions, activeSession, activeSessionDetail, selectSession, createSession, deleteSession, terminalStatuses, setTerminalStatus } = useStore()
   const [provider, setProvider] = useState('kiro_cli')
   const [profile, setProfile] = useState('')
@@ -202,7 +204,7 @@ export function AgentPanel() {
       <div className="bg-gray-800/60 border border-gray-700/50 rounded-xl p-5">
         <div className="flex items-center justify-between gap-2 mb-1 flex-wrap">
           <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wide">
-            Sessions ({sessions.length})
+             {t.agents.sessions} ({sessions.length})
           </h3>
           <div className="flex items-center gap-2 w-full sm:w-auto">
             {sessions.length > 3 && (
@@ -212,7 +214,7 @@ export function AgentPanel() {
                   type="text"
                   value={sessionSearch}
                   onChange={e => setSessionSearch(e.target.value)}
-                  placeholder="Filter sessions..."
+                  placeholder={`${t.common.filter} sessions...`}
                   className="bg-gray-900 border border-gray-700 text-gray-200 text-xs rounded-lg pl-8 pr-3 py-1.5 flex-1 sm:flex-none sm:w-48 focus:border-emerald-500 focus:outline-none"
                 />
               </div>
@@ -222,7 +224,7 @@ export function AgentPanel() {
               className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
             >
               <Plus size={14} />
-              Spawn Agent
+              {t.agents.spawnAgent}
             </button>
           </div>
         </div>
@@ -230,7 +232,7 @@ export function AgentPanel() {
           A session is a workspace where agents collaborate. Each session can have multiple agents that communicate via messages. Click a session to see its agents.
         </p>
         {sessions.length === 0 ? (
-          <p className="text-gray-500 text-sm">No active sessions. Spawn an agent above to create one.</p>
+          <p className="text-gray-500 text-sm">{t.home.noSessions}</p>
         ) : (
           <div className="space-y-2">
             {sessions.filter(s => !sessionSearch || s.id.includes(sessionSearch) || s.name.includes(sessionSearch)).map(s => (
@@ -269,7 +271,7 @@ export function AgentPanel() {
         <div className="bg-gray-800/60 border border-gray-700/50 rounded-xl p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wide">
-              Terminals in {activeSession}
+              {t.agents.terminalsIn} {activeSession}
             </h3>
             <button
               onClick={() => setShowAddAgent(!showAddAgent)}
@@ -277,7 +279,7 @@ export function AgentPanel() {
               title="Add another agent to this session so they can collaborate"
             >
               <Plus size={14} />
-              Add Agent
+              {t.agents.addAgent}
             </button>
           </div>
 
@@ -289,7 +291,7 @@ export function AgentPanel() {
               </p>
               <div className="flex gap-3 items-end flex-wrap">
                 <div className="min-w-[160px]">
-                  <label className="block text-xs text-gray-500 mb-1">Provider</label>
+                  <label className="block text-xs text-gray-500 mb-1">{t.agents.provider}</label>
                   <CustomSelect
                     value={addProvider}
                     onChange={setAddProvider}
@@ -517,7 +519,7 @@ export function AgentPanel() {
             {/* Modal header */}
             <div className="flex items-center justify-between p-5 border-b border-gray-700/50">
               <div>
-                <h3 className="text-base font-semibold text-gray-200">Spawn Agent</h3>
+                <h3 className="text-base font-semibold text-gray-200">{t.agents.spawnAgent}</h3>
                 <p className="text-xs text-gray-500 mt-1">
                   Launch a new AI agent in its own isolated tmux session.
                 </p>
@@ -533,7 +535,7 @@ export function AgentPanel() {
             {/* Modal body */}
             <div className="p-5 space-y-4">
               <div>
-                <label className="block text-xs text-gray-500 mb-1">Provider</label>
+                <label className="block text-xs text-gray-500 mb-1">{t.agents.provider}</label>
                 <CustomSelect
                   value={provider}
                   onChange={setProvider}
