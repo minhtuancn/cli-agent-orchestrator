@@ -195,10 +195,10 @@ export function FlowsPanel() {
               <div key={f.name} className="bg-gray-900/50 border border-gray-700/30 rounded-lg">
                 {/* Row header */}
                 <div
-                  className="flex items-center justify-between p-3 cursor-pointer hover:bg-gray-800/50 transition-colors"
+                  className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between p-3 cursor-pointer hover:bg-gray-800/50 transition-colors"
                   onClick={() => setExpanded(expanded === f.name ? null : f.name)}
                 >
-                  <div className="flex items-center gap-3 min-w-0">
+                  <div className="flex items-center gap-3 min-w-0 flex-wrap">
                     <Clock size={14} className="text-gray-400 shrink-0" />
                     <span className="text-sm text-gray-200 font-medium truncate">{f.name}</span>
                     <span className="text-xs text-gray-500 shrink-0" title={f.schedule}>
@@ -213,7 +213,7 @@ export function FlowsPanel() {
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-2 shrink-0 ml-3">
+                  <div className="flex items-center gap-2 sm:shrink-0 sm:ml-3 flex-wrap">
                     {/* Toggle enable/disable */}
                     <button
                       onClick={e => { e.stopPropagation(); handleToggle(f) }}

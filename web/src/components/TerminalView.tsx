@@ -120,17 +120,17 @@ export function TerminalView({ terminalId, provider, agentProfile, onClose }: Te
   }, [terminalId])
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col" style={{ background: '#0d1117' }}>
+    <div className="fixed inset-0 z-50 flex flex-col" style={{ background: '#0d1117', paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-2 bg-gray-900 border-b border-gray-700/50 shrink-0">
-        <div className="flex items-center gap-3">
-          <TermIcon size={16} className="text-emerald-400" />
-          <span className="text-sm font-mono text-gray-300">{terminalId}</span>
-          {provider && <span className="text-xs text-gray-500 bg-gray-800 px-2 py-0.5 rounded">{provider}</span>}
-          {agentProfile && <span className="text-xs text-emerald-400 bg-emerald-900/30 px-2 py-0.5 rounded">{agentProfile}</span>}
+        <div className="flex items-center justify-between gap-2 px-4 py-2 bg-gray-900 border-b border-gray-700/50 shrink-0">
+        <div className="flex items-center gap-3 min-w-0">
+          <TermIcon size={16} className="text-emerald-400 shrink-0" />
+          <span className="text-sm font-mono text-gray-300 truncate">{terminalId}</span>
+          {provider && <span className="text-xs text-gray-500 bg-gray-800 px-2 py-0.5 rounded shrink-0">{provider}</span>}
+          {agentProfile && <span className="text-xs text-emerald-400 bg-emerald-900/30 px-2 py-0.5 rounded shrink-0">{agentProfile}</span>}
         </div>
-        <div className="flex items-center gap-3">
-          <span className="text-[10px] text-gray-600">Click X to close</span>
+        <div className="flex items-center gap-3 shrink-0">
+          <span className="text-[10px] text-gray-600 hidden sm:inline">Click X to close</span>
           <button
             onClick={onClose}
             className="p-1 text-gray-500 hover:text-white transition-colors rounded"

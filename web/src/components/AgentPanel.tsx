@@ -200,11 +200,11 @@ export function AgentPanel() {
     <div className="space-y-6">
       {/* Sessions List */}
       <div className="bg-gray-800/60 border border-gray-700/50 rounded-xl p-5">
-        <div className="flex items-center justify-between mb-1">
+        <div className="flex items-center justify-between gap-2 mb-1 flex-wrap">
           <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wide">
             Sessions ({sessions.length})
           </h3>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
             {sessions.length > 3 && (
               <div className="relative">
                 <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-500" />
@@ -213,7 +213,7 @@ export function AgentPanel() {
                   value={sessionSearch}
                   onChange={e => setSessionSearch(e.target.value)}
                   placeholder="Filter sessions..."
-                  className="bg-gray-900 border border-gray-700 text-gray-200 text-xs rounded-lg pl-8 pr-3 py-1.5 w-48 focus:border-emerald-500 focus:outline-none"
+                  className="bg-gray-900 border border-gray-700 text-gray-200 text-xs rounded-lg pl-8 pr-3 py-1.5 flex-1 sm:flex-none sm:w-48 focus:border-emerald-500 focus:outline-none"
                 />
               </div>
             )}
@@ -355,15 +355,15 @@ export function AgentPanel() {
           <div className="space-y-2">
             {activeSessionDetail.terminals.map(t => (
               <div key={t.id} className="bg-gray-900/50 border border-gray-700/30 rounded-lg p-3 space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <TermIcon size={14} className="text-gray-400" />
-                    <span className="text-sm font-mono text-gray-300">{t.id}</span>
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <TermIcon size={14} className="text-gray-400 shrink-0" />
+                    <span className="text-sm font-mono text-gray-300 truncate">{t.id}</span>
                     <StatusBadge status={terminalStatuses[t.id] || null} />
                     <span className="text-xs text-gray-500">{t.provider}</span>
                     {t.agent_profile && <span className="text-xs text-emerald-400">{t.agent_profile}</span>}
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <button
                       onClick={() => setInboxTerminalId(t.id)}
                       className="flex items-center gap-2 px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-white text-xs font-medium rounded-lg transition-colors"
@@ -410,7 +410,7 @@ export function AgentPanel() {
                 </div>
                 {/* Working Directory Display */}
                 {terminalWorkDirs[t.id] && (
-                  <div className="flex items-center gap-1.5" title={terminalWorkDirs[t.id]!}>
+                    <div className="flex items-center gap-1.5 min-w-0" title={terminalWorkDirs[t.id]!}>
                     <FolderOpen size={12} className="text-gray-600 shrink-0" />
                     <span className="text-xs font-mono text-gray-500 truncate max-w-[400px]">{terminalWorkDirs[t.id]}</span>
                   </div>

@@ -154,7 +154,7 @@ export function SettingsPanel() {
   return (
     <div className="space-y-6">
       <div className="bg-gray-800/60 border border-gray-700/50 rounded-xl p-5">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
           <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wide">
             Agent Profile Directories
           </h3>
@@ -188,7 +188,7 @@ export function SettingsPanel() {
           </div>
         )}
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <input
             type="text"
             value={newDir}

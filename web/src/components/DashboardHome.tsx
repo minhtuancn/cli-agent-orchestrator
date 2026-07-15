@@ -391,10 +391,10 @@ export function DashboardHome({ onNavigate }: { onNavigate: (tab: string) => voi
 
                 {/* Session header */}
                 <button onClick={() => toggleSession(session.name)} className="w-full text-left p-4 pr-12 hover:bg-gray-800/40 transition-colors">
-                  <div className="flex items-center gap-3">
-                    {expandedSessions.has(session.name) ? <ChevronDown size={14} className="text-gray-500" /> : <ChevronRight size={14} className="text-gray-500" />}
-                    <Users size={14} className="text-emerald-400" />
-                    <span className="text-sm font-mono text-gray-200">{session.name}</span>
+                  <div className="flex items-center gap-3 min-w-0">
+                    {expandedSessions.has(session.name) ? <ChevronDown size={14} className="text-gray-500 shrink-0" /> : <ChevronRight size={14} className="text-gray-500 shrink-0" />}
+                    <Users size={14} className="text-emerald-400 shrink-0" />
+                    <span className="text-sm font-mono text-gray-200 truncate">{session.name}</span>
                     <span className="text-xs text-gray-500">{session.terminals.length} agent{session.terminals.length !== 1 ? 's' : ''}</span>
                   </div>
                   <div className="ml-8 mt-1.5 flex flex-col gap-1">
@@ -428,7 +428,7 @@ export function DashboardHome({ onNavigate }: { onNavigate: (tab: string) => voi
                             const showActive = relActive && relActive !== relCreated
                             return (
                               <div key={t.id} className="bg-gray-900/50 border border-gray-700/30 rounded-lg px-3 py-2 space-y-1.5">
-                                <div className="flex items-center justify-between">
+                                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                                   <div className="flex items-center gap-2 min-w-0">
                                     <TermIcon size={12} className="text-gray-500 shrink-0" />
                                     <span className="text-xs font-medium text-gray-300 truncate">{t.agent_profile || 'default'}</span>
@@ -436,7 +436,7 @@ export function DashboardHome({ onNavigate }: { onNavigate: (tab: string) => voi
                                     <StatusBadge status={terminalStatuses[t.id] || null} />
                                     <span className="text-[10px] text-gray-600">{t.provider}</span>
                                   </div>
-                                  <div className="flex items-center gap-1 shrink-0">
+                                  <div className="flex items-center gap-1 flex-wrap">
                                     <button onClick={() => setInboxTerminalId(t.id)} className="p-1 text-gray-500 hover:text-white bg-gray-800 hover:bg-gray-700 rounded transition-colors" title="Inbox"><Mail size={12} /></button>
                                     <button onClick={() => setOutputTerminalId(t.id)} className="p-1 text-gray-500 hover:text-white bg-gray-800 hover:bg-gray-700 rounded transition-colors" title="Output"><FileText size={12} /></button>
                                     <button onClick={() => setLiveTerminal({ id: t.id, provider: t.provider, agentProfile: t.agent_profile })} className="flex items-center gap-1 px-2 py-1 bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-medium rounded transition-colors"><Monitor size={12} />Terminal</button>

@@ -158,7 +158,7 @@ export function MemoryPanel() {
     <div className="space-y-6">
       {/* Memory List */}
       <div className="bg-gray-800/60 border border-gray-700/50 rounded-xl p-5">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
           <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wide">
             Memories ({filtered.length})
           </h3>
@@ -174,27 +174,27 @@ export function MemoryPanel() {
         </div>
 
         {/* Filters */}
-        <div className="flex items-center gap-3 mb-4">
+        <div className="flex items-center gap-3 mb-4 flex-wrap">
           <CustomSelect
             value={scopeFilter}
             onChange={setScopeFilter}
             options={SCOPE_OPTIONS}
-            className="w-40"
+            className="w-full sm:w-40"
           />
           <CustomSelect
             value={typeFilter}
             onChange={setTypeFilter}
             options={TYPE_OPTIONS}
-            className="w-40"
+            className="w-full sm:w-40"
           />
-          <div className="relative">
+          <div className="relative w-full sm:w-auto">
             <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-500" />
             <input
               type="text"
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Filter keys..."
-              className="bg-gray-900 border border-gray-700 text-gray-200 text-xs rounded-lg pl-8 pr-3 py-1.5 w-48 focus:border-emerald-500 focus:outline-none"
+              className="bg-gray-900 border border-gray-700 text-gray-200 text-xs rounded-lg pl-8 pr-3 py-1.5 w-full sm:w-48 focus:border-emerald-500 focus:outline-none"
             />
           </div>
         </div>
@@ -213,10 +213,10 @@ export function MemoryPanel() {
               <div key={rowId(m)} className="bg-gray-900/50 border border-gray-700/30 rounded-lg">
                 {/* Row header */}
                 <div
-                  className="flex items-center justify-between p-3 cursor-pointer hover:bg-gray-800/50 transition-colors"
+                  className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between p-3 cursor-pointer hover:bg-gray-800/50 transition-colors"
                   onClick={() => handleExpand(m)}
                 >
-                  <div className="flex items-center gap-3 min-w-0">
+                  <div className="flex items-center gap-3 min-w-0 flex-wrap">
                     <Brain size={14} className="text-gray-400 shrink-0" />
                     <span className="text-sm text-gray-200 font-medium truncate">{m.key}</span>
                     <span className={`text-xs px-2 py-0.5 rounded-full shrink-0 ${SCOPE_PILL[m.scope] || 'bg-gray-700 text-gray-400'}`}>
@@ -231,7 +231,7 @@ export function MemoryPanel() {
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-2 shrink-0 ml-3">
+                  <div className="flex items-center gap-2 sm:shrink-0 sm:ml-3 flex-wrap">
                     {/* Delete */}
                     <button
                       onClick={e => { e.stopPropagation(); setPendingDelete(m) }}
