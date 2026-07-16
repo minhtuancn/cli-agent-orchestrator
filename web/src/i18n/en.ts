@@ -6,6 +6,7 @@ export const en = {
     flows: 'Flows',
     settings: 'Settings',
     memory: 'Memory',
+    guide: 'Guide',
   },
   header: {
     sessions: 'sessions',
@@ -110,6 +111,44 @@ export const en = {
     profiles: 'Profiles',
     activeSessions: 'Active Sessions',
     manageFlows: 'Manage Flows',
+  },
+  guide: {
+    title: 'Guide',
+    intro:
+      'CLI Agent Orchestrator (CAO) lets one supervisor agent coordinate multiple worker agents to build features end-to-end. This page explains the interface, the 10 available agent profiles, and how to run the supervised build flow.',
+    sectionOverview: '1. Interface Overview',
+    overviewText:
+      'The left sidebar switches between panels: Home (dashboard + launch), Agents (terminals/sessions), Flows (scheduled workflows), Memory (agent context), Settings, and this Guide. Use the language switch (EN/VI) in the top-right. Log in with the admin password to access the panels.',
+    sectionProfiles: '2. The 10 Agent Profiles',
+    profilesText:
+      'Profiles are reusable agent definitions you can launch via "Launch Agent" or orchestrate via a supervisor. Built-in profiles ship with CAO; local/installed profiles were added for this project.',
+    colName: 'Profile',
+    colRole: 'Role',
+    colDesc: 'Description',
+    roleSupervisor: 'Supervisor',
+    roleDeveloper: 'Developer',
+    roleReviewer: 'Reviewer',
+    roleBuiltin: 'Built-in',
+    sectionRun: '3. Run the Supervised Build',
+    runText:
+      'The fastest way to build a web feature is the agent-run launcher, which starts an internal CAO server and launches the web_feature_supervisor on a real terminal.',
+    runStep1: 'Open a real terminal (SSH into tmux) and run:',
+    runStep2: 'Inside the supervisor terminal that opens, type your feature request, e.g.:',
+    runStep3:
+      'The supervisor assigns web_developer + web_tester in parallel (assign), then hands off to web_reviewer and web_documenter (handoff), and finally reports the result to you.',
+    sectionFlow: '4. How the Flow Works',
+    flowText:
+      'Supervisor → (assign) developer + tester run in parallel → results return via send_message → (handoff) reviewer blocks until done → (handoff) documenter writes docs → supervisor synthesizes the final report.',
+    sectionFaq: '5. FAQ',
+    faq1Q: 'Where is the admin password set?',
+    faq1A:
+      'Via the CAO_ADMIN_PASS environment variable on the cao-server process. Without it, local auth is off and internal agents call the API freely.',
+    faq2Q: 'Why a separate internal port (9887)?',
+    faq2A:
+      'The public server (9889) has auth on for the human UI. The agent flow uses an auth-off internal server so workers are not blocked by 401.',
+    faq3Q: 'Which provider should I use?',
+    faq3A:
+      'opencode_cli is the reliable provider in this environment. You can pin a stronger model for the reviewer via its profile.',
   },
 }
 

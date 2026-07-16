@@ -8,6 +8,7 @@ export const vi: Dict = {
     flows: 'Luồng',
     settings: 'Cài đặt',
     memory: 'Bộ nhớ',
+    guide: 'Hướng dẫn',
   },
   header: {
     sessions: 'phiên',
@@ -112,5 +113,43 @@ export const vi: Dict = {
     profiles: 'Hồ sơ',
     activeSessions: 'Phiên hoạt động',
     manageFlows: 'Quản lý luồng',
+  },
+  guide: {
+    title: 'Hướng dẫn',
+    intro:
+      'CLI Agent Orchestrator (CAO) cho phép một agent giám sát (supervisor) điều phối nhiều agent công nhân (worker) để xây dựng tính năng từ đầu đến cuối. Trang này giải thích giao diện, 10 hồ sơ agent có sẵn và cách chạy luồng xây dựng có giám sát.',
+    sectionOverview: '1. Tổng quan giao diện',
+    overviewText:
+      'Thanh bên trái chuyển đổi giữa các bảng: Trang chủ (bảng điều khiển + khởi chạy), Agent (terminal/phiên), Luồng (workflow định kỳ), Bộ nhớ (ngữ cảnh agent), Cài đặt và Hướng dẫn này. Dùng nút chuyển ngôn ngữ (EN/VI) góc trên bên phải. Đăng nhập bằng mật khẩu admin để truy cập các bảng.',
+    sectionProfiles: '2. 10 hồ sơ Agent',
+    profilesText:
+      'Hồ sơ là các định nghĩa agent có thể tái sử dụng, bạn khởi chạy qua "Khởi chạy Agent" hoặc điều phối qua một supervisor. Hồ sơ built-in đi kèm CAO; hồ sơ local/installed được thêm cho dự án này.',
+    colName: 'Hồ sơ',
+    colRole: 'Vai trò',
+    colDesc: 'Mô tả',
+    roleSupervisor: 'Giám sát',
+    roleDeveloper: 'Lập trình',
+    roleReviewer: 'Kiểm duyệt',
+    roleBuiltin: 'Tích hợp sẵn',
+    sectionRun: '3. Chạy luồng xây dựng có giám sát',
+    runText:
+      'Cách nhanh nhất để xây dựng tính năng web là trình chạy agent-run, nó khởi động một cao-server nội bộ và khởi chạy web_feature_supervisor trên terminal thật.',
+    runStep1: 'Mở terminal thật (SSH vào tmux) và chạy:',
+    runStep2: 'Trong terminal supervisor vừa mở, gõ yêu cầu tính năng, ví dụ:',
+    runStep3:
+      'Supervisor sẽ phân công web_developer + web_tester chạy song song (assign), sau đó chuyển tiếp cho web_reviewer và web_documenter (handoff), và cuối cùng tổng hợp báo cáo trả về bạn.',
+    sectionFlow: '4. Luồng hoạt động',
+    flowText:
+      'Supervisor → (assign) developer + tester chạy song song → kết quả trả về qua send_message → (handoff) reviewer chặn đến khi xong → (handoff) documenter viết docs → supervisor tổng hợp báo cáo cuối.',
+    sectionFaq: '5. Câu hỏi thường gặp',
+    faq1Q: 'Mật khẩu admin được đặt ở đâu?',
+    faq1A:
+      'Qua biến môi trường CAO_ADMIN_PASS trên tiến trình cao-server. Nếu không đặt, auth cục bộ tắt và các agent nội bộ gọi API tự do.',
+    faq2Q: 'Tại sao dùng port nội bộ riêng (9887)?',
+    faq2A:
+      'Server công khai (9889) bật auth cho giao diện người dùng. Luồng agent dùng server nội bộ không auth để worker không bị chặn bởi 401.',
+    faq3Q: 'Nên dùng provider nào?',
+    faq3A:
+      'opencode_cli là provider ổn định trong môi trường này. Bạn có thể gán model mạnh hơn cho reviewer qua profile của nó.',
   },
 }

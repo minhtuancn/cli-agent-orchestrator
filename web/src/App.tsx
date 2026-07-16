@@ -7,6 +7,7 @@ import { AgentPanel } from './components/AgentPanel'
 import { FlowsPanel } from './components/FlowsPanel'
 import { MemoryPanel } from './components/MemoryPanel'
 import { SettingsPanel } from './components/SettingsPanel'
+import { GuidePanel } from './components/GuidePanel'
 import { LoginScreen } from './components/LoginScreen'
 import { useAuth } from './auth/AuthContext'
 import { useI18n, LanguageSwitcher } from './i18n'
@@ -14,7 +15,7 @@ import { Bot, Home, Clock, Settings, Brain, CheckCircle, XCircle, Info, Wifi, Wi
 import { LanguageProvider } from './i18n'
 import { AuthProvider } from './auth/AuthContext'
 
-type TabKey = 'home' | 'agents' | 'flows' | 'settings' | 'memory'
+type TabKey = 'home' | 'agents' | 'flows' | 'settings' | 'memory' | 'guide'
 
 function Snackbar() {
   const { snackbar, hideSnackbar } = useStore()
@@ -62,6 +63,7 @@ function AppShell() {
     { key: 'flows', label: t.nav.flows, icon: <Clock size={16} /> },
     { key: 'settings', label: t.nav.settings, icon: <Settings size={16} /> },
     { key: 'memory', label: t.nav.memory, icon: <Brain size={16} /> },
+    { key: 'guide', label: t.nav.guide, icon: <Info size={16} /> },
   ]
 
   const visibleTabs = TABS.filter((tt) => tt.key !== 'memory' || memoryEnabled)
@@ -179,6 +181,7 @@ function AppShell() {
             {tab === 'flows' && <FlowsPanel />}
             {tab === 'settings' && <SettingsPanel />}
             {tab === 'memory' && <MemoryPanel />}
+            {tab === 'guide' && <GuidePanel />}
           </Suspense>
         </ErrorBoundary>
       </main>
