@@ -25,7 +25,13 @@ _MUTATING_METHODS = {"POST", "PUT", "PATCH", "DELETE"}
 # Routes that use a mutating verb but perform no state change, so they are
 # intentionally not scope-gated. ``POST /workflows/validate`` only parses and
 # validates a spec file (read-only), mirroring a GET.
-_EXEMPT = {("POST", "/workflows/validate")}
+_EXEMPT = {
+    ("POST", "/workflows/validate"),
+    # Authentication bootstrap endpoints are intentionally public and use the
+    # password/session boundary rather than OAuth scope dependencies.
+    ("POST", "/auth/login"),
+    ("POST", "/auth/logout"),
+}
 
 
 def _has_scope_dependency(route) -> bool:

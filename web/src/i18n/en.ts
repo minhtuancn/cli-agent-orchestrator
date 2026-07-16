@@ -144,9 +144,9 @@ export const en = {
     faq1Q: 'Where is the admin password set?',
     faq1A:
       'Via the CAO_ADMIN_PASS environment variable on the cao-server process. Without it, local auth is off and internal agents call the API freely.',
-    faq2Q: 'Why a separate internal port (9887)?',
+    faq2Q: 'Why is one public port enough?',
     faq2A:
-      'The public server (9889) has auth on for the human UI. The agent flow uses an auth-off internal server so workers are not blocked by 401.',
+      'The public server (9889) serves both the human UI and agent orchestration. Humans authenticate through agent.go7s.net; local agents call 127.0.0.1 and use the loopback bypass, so no separate 9887 server is required.',
     faq3Q: 'Which provider should I use?',
     faq3A:
       'opencode_cli is the reliable provider in this environment. You can pin a stronger model for the reviewer via its profile.',

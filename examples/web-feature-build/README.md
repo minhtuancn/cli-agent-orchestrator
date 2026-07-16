@@ -63,9 +63,10 @@ Add a "session count" badge to the CAO web UI top header showing how many
 sessions are currently listed. Keep it minimal and typed.
 ```
 
-The supervisor (`model: opus-codex`, no file tools) must immediately `assign`
-the developer + tester. If it instead starts exploring the codebase, the
-profile/provider is misconfigured — it has no `fs_read`/`Grep` tools by design.
+The supervisor (`model: claude-opus-4-8`, no file tools) must immediately
+`assign` the developer + tester. If it instead starts exploring the codebase,
+the profile/provider is misconfigured — it has no `fs_read`/`Grep` tools by
+design.
 
 ### Option B — manual
 
@@ -92,10 +93,11 @@ CAO_API_PORT=9889 cao launch --agents web_feature_supervisor --provider opencode
 - `web_reviewer` is a direct port of the `code-reviewer` persona from
   `addyosmani/agent-skills`, re-expressed in CAO's `AgentProfile` schema with
   `role: reviewer` and `cao-mcp-server` for callback delivery.
-- The supervisor profile pins `model: opus-codex` and **omits file tools**
-  (`fs_read`/`fs_list`/`Grep`) so it is forced to delegate rather than implement.
-  If you see the supervisor grepping the codebase, the profile did not load.
+- The supervisor profile pins `model: claude-opus-4-8` for OpenCode/9router and
+  **omits file tools** (`fs_read`/`fs_list`/`Grep`) so it is forced to delegate
+  rather than implement. If you see the supervisor grepping the codebase, the
+  profile did not load.
 - Pin a stronger model for the reviewer if desired: add `model:` to
-  `web_reviewer.md` (e.g. `model: opus-codex`).
+  `web_reviewer.md` (for example `model: claude-opus-4-8`).
 - The supervisor deliberately ends its turn after Phase 1 so inbox delivery
   works (see `cao-supervisor-protocols`). Do not add `sleep` loops.

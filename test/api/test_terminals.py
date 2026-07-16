@@ -458,6 +458,7 @@ class TestWebSocketLocalhostRestriction:
                 "cli_agent_orchestrator.api.main.WS_ALLOWED_CLIENTS",
                 ["127.0.0.1", "::1", "localhost", "172.17.0.1"],
             ),
+            patch("cli_agent_orchestrator.api.main._valid_session", return_value=True),
             patch(
                 "cli_agent_orchestrator.api.main.get_terminal_metadata",
                 return_value=None,
@@ -513,6 +514,7 @@ class TestWebSocketLocalhostRestriction:
                 "cli_agent_orchestrator.api.main.WS_ALLOWED_CLIENTS",
                 ["127.0.0.1"],
             ),
+            patch("cli_agent_orchestrator.api.main._valid_session", return_value=True),
             patch(
                 "cli_agent_orchestrator.api.main.get_terminal_metadata",
                 return_value={"tmux_session": "evil:name", "tmux_window": "win"},
@@ -629,6 +631,7 @@ class TestWebSocketSubprocessTerm:
                 "get_terminal_metadata",
                 return_value={"tmux_session": "cao-s", "tmux_window": "w"},
             ),
+            patch.object(main_module, "_valid_session", return_value=True),
             patch.object(main_module, "get_backend", return_value=backend),
             patch.object(main_module.subprocess, "Popen", side_effect=capture_and_stop),
             patch.object(main_module.pty, "openpty", return_value=(100, 101)),
@@ -671,6 +674,7 @@ class TestWebSocketSubprocessTerm:
                 "get_terminal_metadata",
                 return_value={"tmux_session": "cao-s", "tmux_window": "w"},
             ),
+            patch.object(main_module, "_valid_session", return_value=True),
             patch.object(main_module, "get_backend", return_value=backend),
             patch.object(main_module.subprocess, "Popen", side_effect=capture_and_stop),
             patch.object(main_module.pty, "openpty", return_value=(100, 101)),
@@ -704,6 +708,7 @@ class TestWebSocketSubprocessTerm:
                 "get_terminal_metadata",
                 return_value={"tmux_session": "cao-s", "tmux_window": "w"},
             ),
+            patch.object(main_module, "_valid_session", return_value=True),
             patch.object(main_module, "get_backend", return_value=backend),
             patch.object(main_module.pty, "openpty") as mock_openpty,
         ):

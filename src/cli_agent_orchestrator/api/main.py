@@ -2170,11 +2170,12 @@ async def get_inbox_messages_endpoint(
 
 @app.websocket("/terminals/{terminal_id}/ws")
 async def terminal_ws(websocket: WebSocket, terminal_id: str):
-    """WebSocket endpoint for live terminal streaming via tmux attach.
+    """Stream a terminal PTY over WebSocket.
 
-    Security: This endpoint provides full PTY access with no authentication.
-    It is intended for localhost-only use. Do NOT expose the server to
-    untrusted networks (e.g. --host 0.0.0.0) without adding authentication.
+    This is a privileged endpoint: it requires both a valid ``cao_sid`` session
+    cookie and a client source allowed by ``CAO_WS_ALLOWED_CLIENTS``. The
+    cookie check is required even behind a reverse proxy, where every browser
+    connection may appear to originate from the same proxy address.
     """
     # Reject connections from clients outside the configured allowlist.
     # Defaults to loopback; operators running cao-server inside a container can

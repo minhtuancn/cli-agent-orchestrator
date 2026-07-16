@@ -146,9 +146,9 @@ export const vi: Dict = {
     faq1Q: 'Mật khẩu admin được đặt ở đâu?',
     faq1A:
       'Qua biến môi trường CAO_ADMIN_PASS trên tiến trình cao-server. Nếu không đặt, auth cục bộ tắt và các agent nội bộ gọi API tự do.',
-    faq2Q: 'Tại sao dùng port nội bộ riêng (9887)?',
+    faq2Q: 'Vì sao chỉ cần một port công khai?',
     faq2A:
-      'Server công khai (9889) bật auth cho giao diện người dùng. Luồng agent dùng server nội bộ không auth để worker không bị chặn bởi 401.',
+      'Server công khai (9889) phục vụ cả giao diện người dùng và luồng agent. Người dùng đăng nhập qua agent.go7s.net; agent nội bộ gọi 127.0.0.1 qua loopback bypass, nên không cần server 9887 riêng.',
     faq3Q: 'Nên dùng provider nào?',
     faq3A:
       'opencode_cli là provider ổn định trong môi trường này. Bạn có thể gán model mạnh hơn cho reviewer qua profile của nó.',

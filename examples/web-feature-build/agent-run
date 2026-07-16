@@ -67,7 +67,8 @@ install_profiles() {
 launch() {
   log "launching supervisor (provider=${PROVIDER}, session=${SESSION})"
   echo "  → You are now inside the supervisor terminal. Type your feature request."
-  # CAO_API_PORT is exported so cao-mcp-server inside workers targets 9887.
+  # CAO_API_PORT is exported so cao-mcp-server inside workers targets the
+  # same single server (9889 by default, or an explicit override).
   export CAO_API_PORT
   exec cao launch --agents web_feature_supervisor \
     --provider "${PROVIDER}" \

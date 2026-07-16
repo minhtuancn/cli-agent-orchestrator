@@ -5,9 +5,9 @@ description: >-
   parallel implement + test (assign), blocking review + docs (handoff),
   then synthesizes a final report to the user.
 role: supervisor
-# opus-codex is a Codex-CLI-only slug; OpenCode needs a 9router/Anthropic slug.
-# claude-opus-4-8 is the strongest model available via 9router and follows the
-# "delegate only" rule far more reliably than sonnet.
+# OpenCode needs a 9router/Anthropic slug. claude-opus-4-8 is the strongest
+# model available via 9router and follows the "delegate only" rule far more
+# reliably than sonnet.
 model: claude-opus-4-8
 mcpServers:
   cao-mcp-server:
