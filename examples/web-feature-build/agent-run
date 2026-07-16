@@ -1,0 +1,90 @@
+#!/usr/bin/env bash
+# agent-run — launch the CAO "web-feature-build" supervisor on a REAL TTY.
+#
+# Why a dedicated internal port (9887, auth OFF):
+#   The supervisor/workers call the CAO REST API (via cao-mcp-server). If the
+#   public server (9889) has local password auth enabled, those internal calls
+#   get 401 and the whole orchestration breaks. So we run a separate, host-local
+#   server WITHOUT CAO_ADMIN_PASS for the agent flow, leaving 9889 (with auth)
+#   free for the human web UI.
+#
+# Usage:
+#   agent-run                       # provider=opencode_cli, session=web-feat
+#   agent-run --provider codex      # pick a provider
+#   agent-run --session my-build    # custom session name
+#   CAO_EXAMPLES=/path agent-run    # point at a different example dir
+#
+# After launch you land inside the supervisor terminal (tmux). Type your
+# feature request there, e.g.:
+#   "Add a 'session count' badge to the CAO web UI top header."
+set -euo pipefail
+
+CAO_PORT="${CAO_API_PORT:-9887}"           # internal, agent-friendly (no auth)
+PROVIDER="${CAO_PROVIDER:-opencode_cli}"
+SESSION="${CAO_SESSION_NAME:-web-feat}"
+EXAMPLE_DIR="${CAO_EXAMPLES:-/home/dev/cao-web-patch/examples/web-feature-build}"
+PROFILES=(web_feature_supervisor web_developer web_tester web_reviewer web_documenter)
+
+log()  { printf '\033[36m▶\033[0m %s\n' "$*"; }
+ok()   { printf '\033[32m✓\033[0m %s\n' "$*"; }
+warn() { printf '\033[33m⚠\033[0m %s\n' "$*"; }
+
+ensure_server() {
+  if curl -s -m 3 "http://127.0.0.1:${CAO_PORT}/health" >/dev/null 2>&1; then
+    ok "cao-server already up on :${CAO_PORT}"
+    return 0
+  fi
+  log "starting cao-server on :${CAO_PORT} (auth OFF for agent flow)…"
+  # NOTE: intentionally NOT setting CAO_ADMIN_PASS so internal agent calls work.
+  CAO_ALLOWED_HOSTS="${CAO_ALLOWED_HOSTS:-localhost,127.0.0.1}" \
+  CAO_WS_ALLOWED_CLIENTS="${CAO_WS_ALLOWED_CLIENTS:-*}" \
+    nohup cao-server --host 127.0.0.1 --port "${CAO_PORT}" >"/tmp/cao_${CAO_PORT}.log" 2>&1 &
+  for _ in $(seq 1 30); do
+    curl -s -m 2 "http://127.0.0.1:${CAO_PORT}/health" >/dev/null 2>&1 && break
+    sleep 1
+  done
+  if curl -s -m 3 "http://127.0.0.1:${CAO_PORT}/health" >/dev/null 2>&1; then
+    ok "cao-server ready on :${CAO_PORT}"
+  else
+    warn "cao-server did not come up — see /tmp/cao_${CAO_PORT}.log"
+    exit 1
+  fi
+}
+
+install_profiles() {
+  log "installing profiles from ${EXAMPLE_DIR}"
+  for p in "${PROFILES[@]}"; do
+    if cao install "${EXAMPLE_DIR}/${p}.md" >/dev/null 2>&1; then
+      ok "${p}"
+    else
+      warn "${p} install failed (missing file?)"
+    fi
+  done
+}
+
+launch() {
+  log "launching supervisor (provider=${PROVIDER}, session=${SESSION})"
+  echo "  → You are now inside the supervisor terminal. Type your feature request."
+  # CAO_API_PORT is exported so cao-mcp-server inside workers targets 9887.
+  export CAO_API_PORT
+  exec cao launch --agents web_feature_supervisor \
+    --provider "${PROVIDER}" \
+    --session-name "${SESSION}" \
+    --auto-approve --yolo
+}
+
+main() {
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --provider) PROVIDER="$2"; shift 2 ;;
+      --session)  SESSION="$2";  shift 2 ;;
+      -h|--help)  sed -n '2,20p' "$0"; exit 0 ;;
+      *) warn "unknown arg: $1"; shift ;;
+    esac
+  done
+  ensure_server
+  install_profiles
+  launch
+}
+
+main "$@"

@@ -38,9 +38,32 @@ Sequence:
 
 ## Install & Run
 
+### Option A — one-shot script (recommended, runs on a real TTY)
+
+`agent-run` is installed at `~/.local/bin/agent-run` (on PATH) and also copied
+here. It auto-starts a host-local CAO server on port **9887 with auth OFF**
+(so the supervisor/workers can call the API without a session cookie), installs
+all profiles, then launches the supervisor and attaches you to its tmux
+terminal.
+
 ```bash
-# Start the CAO server (if not running)
-cao-server
+agent-run                         # provider=opencode_cli, session=web-feat
+agent-run --provider codex        # pick a different provider
+agent-run --session my-build      # custom session name
+```
+
+Inside the supervisor terminal, give it a task, e.g.:
+
+```
+Add a "session count" badge to the CAO web UI top header showing how many
+sessions are currently listed. Keep it minimal and typed.
+```
+
+### Option B — manual
+
+```bash
+# Start the CAO server on an auth-OFF internal port for the agent flow
+CAO_API_PORT=9887 cao-server --host 127.0.0.1 --port 9887
 
 # Install all profiles
 cao install examples/web-feature-build/web_feature_supervisor.md
@@ -51,16 +74,11 @@ cao install examples/web-feature-build/web_documenter.md
 
 # Launch the supervisor. opencode is the reliable provider in this environment;
 # override per-worker with --provider if you want a stronger model for review.
-cao launch --agents web_feature_supervisor --provider opencode
+CAO_API_PORT=9887 cao launch --agents web_feature_supervisor --provider opencode_cli
 ```
 
-Inside the supervisor terminal, give it a task, e.g.:
-
-```
-Build a "session search/filter" box in the CAO web UI sessions list.
-It filters sessions by name as you type, debounced 200ms, and keeps the
-current selection. Use the existing zustand store pattern.
-```
+> Note: the orchestration flow needs an auth-OFF server. Keep the public
+> server (9889, with `CAO_ADMIN_PASS`) separate for the human web UI.
 
 ## Notes
 - `web_reviewer` is a direct port of the `code-reviewer` persona from
