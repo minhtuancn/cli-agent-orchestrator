@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 # agent-run — launch the CAO "web-feature-build" supervisor on a REAL TTY.
 #
-# Why a dedicated internal port (9887, auth OFF):
-#   The supervisor/workers call the CAO REST API (via cao-mcp-server). If the
-#   public server (9889) has local password auth enabled, those internal calls
-#   get 401 and the whole orchestration breaks. So we run a separate, host-local
-#   server WITHOUT CAO_ADMIN_PASS for the agent flow, leaving 9889 (with auth)
-#   free for the human web UI.
+# Single-server design (port 9889, auth ON):
+#   The supervisor/workers call the CAO REST API (via cao-mcp-server) from
+#   127.0.0.1. The server grants a LOOPBACK AUTH BYPASS for 127.0.0.1/::1, so
+#   internal agent calls succeed WITHOUT a session cookie, while the public
+#   reverse-proxy front (agent.go7s.net -> 9889) still requires login. One
+#   server, one domain, auth stays on for humans.
+#   (Override with CAO_API_PORT=9887 if you still want a separate auth-off box.)
 #
 # Usage:
 #   agent-run                       # provider=opencode_cli, session=web-feat
@@ -15,11 +16,12 @@
 #   CAO_EXAMPLES=/path agent-run    # point at a different example dir
 #
 # After launch you land inside the supervisor terminal (tmux). Type your
-# feature request there, e.g.:
-#   "Add a 'session count' badge to the CAO web UI top header."
+# feature request, then press Ctrl+J to submit (OpenCode TUI uses Ctrl+J,
+# NOT Enter, to send the prompt). The supervisor should then delegate to
+# web_developer/web_tester via cao-assign — it must NOT implement itself.
 set -euo pipefail
 
-CAO_PORT="${CAO_API_PORT:-9887}"           # internal, agent-friendly (no auth)
+CAO_PORT="${CAO_API_PORT:-9889}"           # public server; loopback bypass lets agents call it
 PROVIDER="${CAO_PROVIDER:-opencode_cli}"
 SESSION="${CAO_SESSION_NAME:-web-feat}"
 EXAMPLE_DIR="${CAO_EXAMPLES:-/home/dev/cao-web-patch/examples/web-feature-build}"
@@ -34,11 +36,11 @@ ensure_server() {
     ok "cao-server already up on :${CAO_PORT}"
     return 0
   fi
-  log "starting cao-server on :${CAO_PORT} (auth OFF for agent flow)…"
-  # NOTE: intentionally NOT setting CAO_ADMIN_PASS so internal agent calls work.
-  CAO_ALLOWED_HOSTS="${CAO_ALLOWED_HOSTS:-localhost,127.0.0.1}" \
+  log "starting cao-server on :${CAO_PORT} (loopback bypass for agents)…"
+  # Loopback (127.0.0.1) is auth-exempt; external callers still need login.
+  CAO_ALLOWED_HOSTS="${CAO_ALLOWED_HOSTS:-localhost,127.0.0.1,agent.go7s.net}" \
   CAO_WS_ALLOWED_CLIENTS="${CAO_WS_ALLOWED_CLIENTS:-*}" \
-    nohup cao-server --host 127.0.0.1 --port "${CAO_PORT}" >"/tmp/cao_${CAO_PORT}.log" 2>&1 &
+    nohup cao-server --host 0.0.0.0 --port "${CAO_PORT}" >"/tmp/cao_${CAO_PORT}.log" 2>&1 &
   for _ in $(seq 1 30); do
     curl -s -m 2 "http://127.0.0.1:${CAO_PORT}/health" >/dev/null 2>&1 && break
     sleep 1

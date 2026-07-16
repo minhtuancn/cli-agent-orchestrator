@@ -2,6 +2,28 @@
 
 Base URL: `http://localhost:9889` (default)
 
+## Authentication
+
+Local auth is **opt-in**. Set `CAO_ADMIN_PASS` (or the `CAO_ADMIN_PASS` env on the
+server) to enable it; when unset, every request passes through (host-local dev
+posture).
+
+When enabled:
+- All HTML/static asset routes and `/auth/*`, `/health`, `/api/settings`,
+  `/ws/config` are public.
+- Every other request (REST + `/terminals/{id}/ws`) requires a valid session
+  cookie `cao_sid` obtained from `POST /auth/login`. Missing/invalid → `401`
+  (REST) or a `4401` close (WebSocket).
+- `POST /auth/login` accepts `{ "password", "remember" }`. With `remember: true`
+  the cookie lives `CAO_SESSION_TTL_REMEMBER` seconds (default 30d); otherwise
+  `CAO_SESSION_TTL` (default 1d).
+- **Loopback bypass:** requests originating from `127.0.0.1` / `::1` are exempt
+  from the session check. This lets internal CAO agents (`cao-mcp-server`) call
+  the API from localhost without a cookie, so a single auth-on server can serve
+  both the public web UI (behind a reverse proxy, login required) and the agent
+  orchestration flow (from localhost, no cookie needed). External clients are
+  still challenged.
+
 ## Health Check
 
 ### GET /health

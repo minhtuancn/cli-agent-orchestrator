@@ -41,10 +41,12 @@ Sequence:
 ### Option A — one-shot script (recommended, runs on a real TTY)
 
 `agent-run` is installed at `~/.local/bin/agent-run` (on PATH) and also copied
-here. It auto-starts a host-local CAO server on port **9887 with auth OFF**
-(so the supervisor/workers can call the API without a session cookie), installs
-all profiles, then launches the supervisor and attaches you to its tmux
-terminal.
+here. It expects the **public CAO server on port 9889 (auth ON)** to already be
+running (e.g. via systemd). The server grants a **loopback auth bypass** for
+`127.0.0.1`, so the supervisor/workers can call the REST API from localhost
+without a session cookie — while the public front (`agent.go7s.net -> 9889`)
+still requires a login. One server, one domain. If 9889 is down, `agent-run`
+starts a fallback box on 9889 itself (loopback bypass applies).
 
 ```bash
 agent-run                         # provider=opencode_cli, session=web-feat
@@ -52,18 +54,24 @@ agent-run --provider codex        # pick a different provider
 agent-run --session my-build      # custom session name
 ```
 
-Inside the supervisor terminal, give it a task, e.g.:
+Inside the supervisor terminal, **type your feature request, then press
+`Ctrl+J` to submit** (OpenCode's TUI sends the prompt on `Ctrl+J`, not Enter).
+Example:
 
 ```
 Add a "session count" badge to the CAO web UI top header showing how many
 sessions are currently listed. Keep it minimal and typed.
 ```
 
+The supervisor (`model: opus-codex`, no file tools) must immediately `assign`
+the developer + tester. If it instead starts exploring the codebase, the
+profile/provider is misconfigured — it has no `fs_read`/`Grep` tools by design.
+
 ### Option B — manual
 
 ```bash
-# Start the CAO server on an auth-OFF internal port for the agent flow
-CAO_API_PORT=9887 cao-server --host 127.0.0.1 --port 9887
+# 9889 is normally already up via systemd (loopback bypass on). To run a
+# standalone box instead: CAO_API_PORT=9889 cao-server --host 0.0.0.0 --port 9889
 
 # Install all profiles
 cao install examples/web-feature-build/web_feature_supervisor.md
@@ -72,19 +80,22 @@ cao install examples/web-feature-build/web_tester.md
 cao install examples/web-feature-build/web_reviewer.md
 cao install examples/web-feature-build/web_documenter.md
 
-# Launch the supervisor. opencode is the reliable provider in this environment;
-# override per-worker with --provider if you want a stronger model for review.
-CAO_API_PORT=9887 cao launch --agents web_feature_supervisor --provider opencode_cli
+# Launch the supervisor. opencode is the reliable provider in this environment.
+CAO_API_PORT=9889 cao launch --agents web_feature_supervisor --provider opencode_cli
 ```
 
-> Note: the orchestration flow needs an auth-OFF server. Keep the public
-> server (9889, with `CAO_ADMIN_PASS`) separate for the human web UI.
+> Note: with the loopback bypass, a single auth-on server (9889) serves BOTH
+> the human web UI (via the reverse proxy, login required) and the agent
+> orchestration (from localhost, no cookie needed). No separate 9887 required.
 
 ## Notes
 - `web_reviewer` is a direct port of the `code-reviewer` persona from
   `addyosmani/agent-skills`, re-expressed in CAO's `AgentProfile` schema with
   `role: reviewer` and `cao-mcp-server` for callback delivery.
-- Pin a stronger model for the reviewer if desired: add `provider:` / `model:`
-  to `web_reviewer.md` (e.g. `provider: claude_code`, `model: opus`).
+- The supervisor profile pins `model: opus-codex` and **omits file tools**
+  (`fs_read`/`fs_list`/`Grep`) so it is forced to delegate rather than implement.
+  If you see the supervisor grepping the codebase, the profile did not load.
+- Pin a stronger model for the reviewer if desired: add `model:` to
+  `web_reviewer.md` (e.g. `model: opus-codex`).
 - The supervisor deliberately ends its turn after Phase 1 so inbox delivery
   works (see `cao-supervisor-protocols`). Do not add `sleep` loops.
