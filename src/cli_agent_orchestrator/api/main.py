@@ -629,7 +629,8 @@ app.add_middleware(
 # the upstream posture) so internal CAO agents (cao-mcp-server) can call the
 # API without a session cookie. This mirrors is_auth_enabled() for IdP auth.
 ADMIN_PASSWORD = os.getenv("CAO_ADMIN_PASS") or ""
-SESSION_TTL = int(os.getenv("CAO_SESSION_TTL", "86400"))  # seconds
+SESSION_TTL = int(os.getenv("CAO_SESSION_TTL", "86400"))  # seconds (default session)
+SESSION_TTL_REMEMBER = int(os.getenv("CAO_SESSION_TTL_REMEMBER", "2592000"))  # 30 days
 _SESSIONS: "dict[str, float]" = {}  # token -> expiry epoch
 
 
@@ -756,6 +757,7 @@ async def oauth_protected_resource_metadata():
 # ===========================================================================
 class _LoginRequest(BaseModel):
     password: str
+    remember: bool = False
 
 
 @app.post("/auth/login")
@@ -768,7 +770,8 @@ async def auth_login(request: Request, body: _LoginRequest):
         )
     if hmac.compare_digest(body.password, ADMIN_PASSWORD):
         token = _issue_session()
-        resp = JSONResponse({"ok": True})
+        ttl = SESSION_TTL_REMEMBER if body.remember else SESSION_TTL
+        resp = JSONResponse({"ok": True, "remember": body.remember})
         resp.set_cookie(
             "cao_sid",
             token,
@@ -776,7 +779,7 @@ async def auth_login(request: Request, body: _LoginRequest):
             secure=_is_secure_req(request),
             samesite="lax",
             path="/",
-            max_age=SESSION_TTL,
+            max_age=ttl,
         )
         return resp
     return JSONResponse(

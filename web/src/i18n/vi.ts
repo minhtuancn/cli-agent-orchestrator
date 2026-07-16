@@ -23,6 +23,7 @@ export const vi: Dict = {
     submit: 'Đăng nhập',
     error: 'Sai mật khẩu',
     signingIn: 'Đang đăng nhập…',
+    remember: 'Ghi nhớ đăng nhập (30 ngày)',
   },
   language: 'Ngôn ngữ',
   logout: 'Đăng xuất',

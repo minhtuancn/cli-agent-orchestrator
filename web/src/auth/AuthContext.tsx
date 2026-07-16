@@ -4,7 +4,7 @@ import { api, setUnauthorizedHandler } from '../api'
 interface AuthCtx {
   authenticated: boolean
   loading: boolean
-  login: (password: string) => Promise<boolean>
+  login: (password: string, remember?: boolean) => Promise<boolean>
   logout: () => Promise<void>
 }
 
@@ -33,9 +33,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  const login = async (password: string): Promise<boolean> => {
+  const login = async (password: string, remember = false): Promise<boolean> => {
     try {
-      const r = await api.login(password)
+      const r = await api.login(password, remember)
       if (r.ok) {
         setAuth(true)
         return true

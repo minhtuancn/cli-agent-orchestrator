@@ -21,6 +21,7 @@ export const en = {
     submit: 'Sign in',
     error: 'Incorrect password',
     signingIn: 'Signing in…',
+    remember: 'Remember me (30 days)',
   },
   language: 'Language',
   logout: 'Log out',

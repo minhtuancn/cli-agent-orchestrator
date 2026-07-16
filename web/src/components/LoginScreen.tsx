@@ -7,6 +7,7 @@ export function LoginScreen() {
   const { login } = useAuth()
   const { t } = useI18n()
   const [pw, setPw] = useState('')
+  const [remember, setRemember] = useState(false)
   const [err, setErr] = useState(false)
   const [busy, setBusy] = useState(false)
 
@@ -15,7 +16,7 @@ export function LoginScreen() {
     if (!pw || busy) return
     setBusy(true)
     setErr(false)
-    const ok = await login(pw)
+    const ok = await login(pw, remember)
     setBusy(false)
     if (!ok) {
       setErr(true)
@@ -50,6 +51,16 @@ export function LoginScreen() {
           className="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
         />
         {err && <p className="text-red-400 text-sm mt-2">{t.login.error}</p>}
+
+        <label className="flex items-center gap-2 mt-3 text-sm text-gray-400 cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={remember}
+            onChange={(e) => setRemember(e.target.checked)}
+            className="accent-emerald-500 w-4 h-4"
+          />
+          {t.login.remember}
+        </label>
 
         <button
           type="submit"

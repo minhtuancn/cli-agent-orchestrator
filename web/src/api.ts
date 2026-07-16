@@ -126,11 +126,11 @@ export interface MemoryDetail extends MemorySummary {
 
 export const api = {
   // Admin auth
-  login: (password: string) =>
-    fetchJSON<{ ok: boolean }>('/auth/login', {
+  login: (password: string, remember = false) =>
+    fetchJSON<{ ok: boolean; remember?: boolean }>('/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password }),
+      body: JSON.stringify({ password, remember }),
       timeoutMs: 10000,
     }),
   logout: () => fetchJSON<{ ok: boolean }>('/auth/logout', { method: 'POST', timeoutMs: 10000 }),
