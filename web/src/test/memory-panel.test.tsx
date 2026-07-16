@@ -1,6 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { MemoryPanel } from '../components/MemoryPanel'
+import { LanguageProvider } from '../i18n'
+
+const renderMemory = () => render(<LanguageProvider><MemoryPanel /></LanguageProvider>)
 
 const MEMORIES = [
   {
@@ -45,7 +48,7 @@ describe('MemoryPanel', () => {
 
   it('renders memory rows after fetch', async () => {
     mockListResponse(MEMORIES)
-    render(<MemoryPanel />)
+    renderMemory()
     expect(await screen.findByText('project-conventions')).toBeInTheDocument()
     expect(screen.getByText('user-preferences')).toBeInTheDocument()
     expect(screen.getByText('global')).toBeInTheDocument()
@@ -54,13 +57,13 @@ describe('MemoryPanel', () => {
 
   it('shows empty state when no memories', async () => {
     mockListResponse([])
-    render(<MemoryPanel />)
+    renderMemory()
     expect(await screen.findByText('No memories stored.')).toBeInTheDocument()
   })
 
   it('shows ConfirmModal when delete is clicked', async () => {
     mockListResponse(MEMORIES)
-    render(<MemoryPanel />)
+    renderMemory()
     await screen.findByText('project-conventions')
     const deleteButtons = screen.getAllByTitle('Delete memory')
     fireEvent.click(deleteButtons[0])
@@ -73,7 +76,7 @@ describe('MemoryPanel', () => {
 
   it('disables Clear scope button when no scope filter is selected', async () => {
     mockListResponse(MEMORIES)
-    render(<MemoryPanel />)
+    renderMemory()
     await screen.findByText('project-conventions')
     const clearButton = screen.getByText('Clear scope…').closest('button')
     expect(clearButton).toBeDisabled()
@@ -81,7 +84,7 @@ describe('MemoryPanel', () => {
 
   it('filters rows by key search client-side', async () => {
     mockListResponse(MEMORIES)
-    render(<MemoryPanel />)
+    renderMemory()
     await screen.findByText('project-conventions')
     fireEvent.change(screen.getByPlaceholderText('Filter keys...'), { target: { value: 'user-pref' } })
     expect(screen.queryByText('project-conventions')).not.toBeInTheDocument()

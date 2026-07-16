@@ -1,6 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { SettingsPanel } from '../components/SettingsPanel'
+import { LanguageProvider } from '../i18n'
+
+const renderSettings = () => render(<LanguageProvider><SettingsPanel /></LanguageProvider>)
 
 const AGENT_STORE = '/home/u/.aws/cli-agent-orchestrator/agent-store'
 const DEFAULTS = {
@@ -48,7 +51,7 @@ describe('SettingsPanel — directory enable/disable (GH #280/#281)', () => {
   afterEach(() => vi.restoreAllMocks())
 
   it('lists defaults (deduped) + custom dirs, profile count, and duplicate note', async () => {
-    render(<SettingsPanel />)
+    renderSettings()
     expect(await screen.findByText('/home/u/.kiro/agents')).toBeInTheDocument()
     expect(screen.getByText('/team/a')).toBeInTheDocument()
     // agent-store shared by two providers renders exactly once
@@ -58,10 +61,10 @@ describe('SettingsPanel — directory enable/disable (GH #280/#281)', () => {
   })
 
   it('disabling a directory POSTs it in disabled_dirs and flips the switch off', async () => {
-    render(<SettingsPanel />)
+    renderSettings()
     await screen.findByText('/team/a')
 
-    const toggle = screen.getByRole('switch', { name: 'Enable /team/a' })
+    const toggle = screen.getByRole('switch', { name: 'Toggle /team/a' })
     expect(toggle).toHaveAttribute('aria-checked', 'true')
     fireEvent.click(toggle)
 
@@ -69,7 +72,7 @@ describe('SettingsPanel — directory enable/disable (GH #280/#281)', () => {
       expect(posts.some(p => p.disabled_dirs?.includes('/team/a'))).toBe(true)
     )
     await waitFor(() =>
-      expect(screen.getByRole('switch', { name: 'Enable /team/a' })).toHaveAttribute(
+      expect(screen.getByRole('switch', { name: 'Toggle /team/a' })).toHaveAttribute(
         'aria-checked',
         'false'
       )
@@ -77,16 +80,16 @@ describe('SettingsPanel — directory enable/disable (GH #280/#281)', () => {
   })
 
   it('disabling a built-in default persists it (no more silent reappear — #281)', async () => {
-    render(<SettingsPanel />)
+    renderSettings()
     await screen.findByText('/home/u/.kiro/agents')
-    fireEvent.click(screen.getByRole('switch', { name: 'Enable /home/u/.kiro/agents' }))
+    fireEvent.click(screen.getByRole('switch', { name: 'Toggle /home/u/.kiro/agents' }))
     await waitFor(() =>
       expect(posts.some(p => p.disabled_dirs?.includes('/home/u/.kiro/agents'))).toBe(true)
     )
   })
 
   it('removing a custom dir POSTs extra_dirs without it', async () => {
-    render(<SettingsPanel />)
+    renderSettings()
     await screen.findByText('/team/a')
     fireEvent.click(screen.getByRole('button', { name: 'Remove /team/a' }))
     await waitFor(() =>
@@ -97,7 +100,7 @@ describe('SettingsPanel — directory enable/disable (GH #280/#281)', () => {
   })
 
   it('built-in defaults cannot be removed (no remove button)', async () => {
-    render(<SettingsPanel />)
+    renderSettings()
     await screen.findByText('/home/u/.kiro/agents')
     expect(screen.queryByRole('button', { name: 'Remove /home/u/.kiro/agents' })).toBeNull()
   })

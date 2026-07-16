@@ -78,11 +78,13 @@ should run both before a production release.
 
 1. Rotate the admin password and update the external env file.
 2. Verify NPM Proxy WebSocket upgrade from an external browser.
-3. Add a real browser E2E test for login, terminal WebSocket, reconnect, and logout.
-4. Add an automated deployment step that rebuilds/install profiles and the Web UI
-   instead of copying files into `site-packages` manually.
-5. Install Trivy and CodeQL and archive their results.
-6. Add a cleanup/health monitor for orphaned agent sessions after crashes.
+3. Run the Playwright smoke suite against the real domain and add terminal
+   WebSocket/reconnect coverage.
+4. `scripts/deploy-local.sh` now automates package/UI/profile deployment; validate
+   it from a clean checkout and CI runner.
+5. `scripts/reconcile-sessions.py` now provides safe dry-run metadata cleanup;
+   process-level orphan cleanup still needs ownership-aware hardening.
+6. Install Trivy and CodeQL and archive their results.
 
 ## Release recommendation
 

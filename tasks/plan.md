@@ -18,6 +18,8 @@ Không thay đổi kiến trúc single-domain `agent.go7s.net -> 9889` trong pha
 
 ### Task 1: Rotate admin secret
 
+**Status:** Pending operator action (must be done outside git).
+
 **Acceptance criteria:**
 - [ ] Password cũ không còn dùng được.
 - [ ] `cao-server.env` có mode `0600`, không nằm trong git.
@@ -28,6 +30,8 @@ Không thay đổi kiến trúc single-domain `agent.go7s.net -> 9889` trong pha
 **Dependencies:** None.
 
 ### Task 2: Verify external domain and WebSocket
+
+**Status:** Pending external browser/NPM Proxy verification.
 
 **Acceptance criteria:**
 - [ ] `https://agent.go7s.net/` load được.

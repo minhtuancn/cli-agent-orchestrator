@@ -41,7 +41,7 @@ A single-page dashboard for managing CLI Agent Orchestrator sessions, agents, fl
 | Terminal Emulator | xterm.js |
 | Icons | Lucide React |
 | Build Tool | Vite |
-| Testing | Vitest + React Testing Library |
+ | Testing | Vitest + React Testing Library + Playwright |
 | Language | TypeScript |
 
 ### Data Flow
@@ -164,4 +164,7 @@ npm test
 # Run from project root
 uv run pytest test/ -k "web"  # Backend API tests
 cd web/ && npm test            # Frontend unit tests
+cd web/ && npm run test:e2e    # Playwright browser smoke tests
+# Optional authenticated E2E:
+CAO_E2E_ADMIN_PASSWORD='test-secret' npm run test:e2e
 ```
