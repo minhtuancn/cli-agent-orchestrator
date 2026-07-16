@@ -624,9 +624,18 @@ app.add_middleware(
 #   * Sessions live in-process (lost on restart -> re-login). Fine for a
 #     single-admin dev panel.
 # ===========================================================================
-ADMIN_PASSWORD = os.getenv("CAO_ADMIN_PASS", "Vkn@1234561")
+# Local password auth is OPT-IN: it only activates when CAO_ADMIN_PASS is
+# explicitly set. When unset, the layer stays off (host-local, byte-for-byte
+# the upstream posture) so internal CAO agents (cao-mcp-server) can call the
+# API without a session cookie. This mirrors is_auth_enabled() for IdP auth.
+ADMIN_PASSWORD = os.getenv("CAO_ADMIN_PASS") or ""
 SESSION_TTL = int(os.getenv("CAO_SESSION_TTL", "86400"))  # seconds
 _SESSIONS: "dict[str, float]" = {}  # token -> expiry epoch
+
+
+def _is_local_auth_enabled() -> bool:
+    """Return True only when a local admin password is configured."""
+    return bool(ADMIN_PASSWORD)
 
 
 def _issue_session() -> str:
@@ -673,6 +682,10 @@ def _is_public_path(path: str) -> bool:
 
 class _AuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
+        # Local auth is opt-in: when no admin password is configured the layer
+        # is off and every request passes through (host-local dev posture).
+        if not _is_local_auth_enabled():
+            return await call_next(request)
         if _is_public_path(request.url.path):
             return await call_next(request)
         if _valid_session(request.cookies.get("cao_sid")):
@@ -748,6 +761,11 @@ class _LoginRequest(BaseModel):
 @app.post("/auth/login")
 async def auth_login(request: Request, body: _LoginRequest):
     """Validate the admin password and issue an HttpOnly session cookie."""
+    if not _is_local_auth_enabled():
+        return JSONResponse(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            content={"ok": False, "error": "auth_disabled"},
+        )
     if hmac.compare_digest(body.password, ADMIN_PASSWORD):
         token = _issue_session()
         resp = JSONResponse({"ok": True})
