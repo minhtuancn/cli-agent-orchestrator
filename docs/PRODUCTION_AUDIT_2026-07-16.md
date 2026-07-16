@@ -3,7 +3,7 @@
 **Date:** 2026-07-16  
 **Repository:** `minhtuancn/cli-agent-orchestrator`  
 **Branch:** `mobile-responsive`  
-**Audited revision:** `ed5fe98` plus uncommitted audit fixes
+**Audited revision:** `8e28227`
 
 ## Executive summary
 
@@ -21,8 +21,10 @@ terminal WebSocket remains protected by both the source allowlist and the
 ## Verification evidence
 
 - Python compile check: pass.
-- Targeted API/MCP/profile tests before audit fixes: 258 passed, 5 failed.
+- Targeted API/MCP/profile tests after audit fixes: **177 passed**.
 - Terminal WebSocket tests after updating their authentication contract: **39 passed**.
+- Full suite was started; it exceeded the local 120–240 second tool timeout. It
+  must complete in CI or with a longer timeout before a release gate is marked green.
 - Frontend TypeScript/Vite production build: pass.
 - Runtime service: `cao-server.service` active and listening on `0.0.0.0:9889`.
 - Runtime auth checks previously verified: loopback API without cookie returns 200;
