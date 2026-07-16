@@ -6,7 +6,7 @@
 - [x] Verify `https://agent.go7s.net` health/UI từ browser ngoài.
 - [x] Verify unauthenticated terminal path qua domain trả `401`.
 - [x] Xác nhận runtime `CAO_WS_ALLOWED_CLIENTS` không dùng `*`.
-- [ ] Verify authenticated terminal WebSocket upgrade qua NPM Proxy.
+- [x] Verify authenticated terminal WebSocket upgrade qua NPM Proxy.
 
 ## P1 — reliability
 

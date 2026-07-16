@@ -42,8 +42,10 @@ Do not place the password in `cao-server.service`. Do not commit the env file.
 - Preserve the `Host` header or add `agent.go7s.net` to `CAO_ALLOWED_HOSTS`.
 - Forward `X-Forwarded-Proto: https` so secure cookies are issued.
 - Enable WebSocket upgrade (`Upgrade` and `Connection` headers).
-- If the proxy source is not loopback, add its stable IP to
-  `CAO_WS_ALLOWED_CLIENTS` and `CAO_FORWARDED_ALLOW_IPS`.
+- The current NPM Proxy source observed in production is `10.20.10.111`;
+  it is allowlisted in `CAO_WS_ALLOWED_CLIENTS`.
+- If the proxy source changes, add its stable IP to `CAO_WS_ALLOWED_CLIENTS`
+  and `CAO_FORWARDED_ALLOW_IPS`; do not use `*`.
 - Do not use `CAO_WS_ALLOWED_CLIENTS=*` for an internet-facing deployment.
 
 ## Agent workflow

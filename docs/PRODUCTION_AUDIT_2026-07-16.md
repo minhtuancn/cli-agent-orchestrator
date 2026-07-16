@@ -30,7 +30,9 @@ terminal WebSocket remains protected by both the source allowlist and the
 - Runtime auth checks: loopback API without cookie returns 200; external API
   without cookie returns 401; login returns 200.
 - Public domain checks: `https://agent.go7s.net/health` returns 200, public UI
-  loads in Chromium, and unauthenticated terminal access returns 401.
+  loads in Chromium, unauthenticated terminal access returns 401, and an
+  authenticated terminal WebSocket upgrade was accepted after allowlisting
+  the observed NPM Proxy source `10.20.10.111`.
 - Security scanner syntax: `bash -n scripts/security-scan.sh` passes.
 - Trivy is configured in `.github/workflows/ci.yml` and CodeQL is configured in
   `.github/workflows/codeql.yml`; local binaries were not installed, so local
