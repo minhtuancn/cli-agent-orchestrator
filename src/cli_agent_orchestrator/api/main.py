@@ -689,6 +689,12 @@ class _AuthMiddleware(BaseHTTPMiddleware):
             return await call_next(request)
         if _is_public_path(request.url.path):
             return await call_next(request)
+        # Loopback bypass: internal CAO agents (cao-mcp-server) call the API
+        # from 127.0.0.1/::1 without a session cookie. This lets a single
+        # auth-on server (e.g. behind a public reverse proxy) also serve the
+        # agent orchestration flow on localhost.
+        if request.client and request.client.host in ("127.0.0.1", "::1"):
+            return await call_next(request)
         if _valid_session(request.cookies.get("cao_sid")):
             return await call_next(request)
         # Any API call without a valid session -> 401 so the SPA redirects.
