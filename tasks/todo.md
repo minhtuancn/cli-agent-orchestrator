@@ -3,9 +3,10 @@
 ## P0 — bắt buộc trước production public
 
 - [ ] Rotate `CAO_ADMIN_PASS`; verify password cũ fail.
-- [ ] Verify `https://agent.go7s.net` từ browser bên ngoài.
-- [ ] Verify WebSocket upgrade/auth qua NPM Proxy.
-- [ ] Xác nhận `CAO_WS_ALLOWED_CLIENTS` không dùng `*`.
+- [x] Verify `https://agent.go7s.net` health/UI từ browser ngoài.
+- [x] Verify unauthenticated terminal path qua domain trả `401`.
+- [x] Xác nhận runtime `CAO_WS_ALLOWED_CLIENTS` không dùng `*`.
+- [ ] Verify authenticated terminal WebSocket upgrade qua NPM Proxy.
 
 ## P1 — reliability
 
@@ -20,8 +21,8 @@
 
 ## P2 — security/quality
 
-- [ ] Thêm Trivy vào CI.
-- [ ] Thêm CodeQL Python vào CI.
+- [x] Trivy đã có trong `.github/workflows/ci.yml`.
+- [x] CodeQL Python đã thêm trong `.github/workflows/codeql.yml`.
 - [ ] Thêm secret scanning vào CI.
 - [ ] Thiết kế service token cho agent chạy multi-host.
 - [ ] Tăng coverage các module có coverage thấp: memory, terminal, MCP, providers.

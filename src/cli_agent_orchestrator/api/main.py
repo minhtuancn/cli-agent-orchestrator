@@ -670,7 +670,7 @@ def _is_secure_req(request: Request) -> bool:
 
 # Paths reachable WITHOUT a session (login UI + auth endpoints).
 _AUTH_PUBLIC_EXACT = frozenset(
-    {"", "/", "/index.html", "/auth/login", "/auth/logout", "/auth/me"}
+    {"", "/", "/index.html", "/health", "/auth/login", "/auth/logout", "/auth/me"}
 )
 _AUTH_PUBLIC_PREFIX = ("/assets/", "/favicon", "/vite.svg", "/.well-known/")
 

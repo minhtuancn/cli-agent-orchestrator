@@ -71,6 +71,8 @@ Không thay đổi kiến trúc single-domain `agent.go7s.net -> 9889` trong pha
 
 ### Task 5: Orphan session reconciliation
 
+**Status:** Implemented as safe dry-run plus opt-in `--apply --kill-backend`; process ownership beyond CAO prefix remains deliberately out of scope.
+
 **Acceptance criteria:**
 - [ ] Server restart phát hiện session/terminal stale.
 - [ ] Có lệnh cleanup an toàn, không đụng session tmux không thuộc CAO.
@@ -81,6 +83,8 @@ Không thay đổi kiến trúc single-domain `agent.go7s.net -> 9889` trong pha
 **Dependencies:** None.
 
 ### Task 6: Browser E2E regression suite
+
+**Status:** Smoke suite implemented and passes locally plus public health/UI checks; authenticated terminal WebSocket/reconnect remains pending.
 
 **Acceptance criteria:**
 - [ ] Login/Remember me/logout.
@@ -95,6 +99,8 @@ Không thay đổi kiến trúc single-domain `agent.go7s.net -> 9889` trong pha
 ## Phase 3: Security and performance
 
 ### Task 7: CI security gates
+
+**Status:** Trivy exists in CI; CodeQL Python added in `.github/workflows/codeql.yml`; secret scan and CI execution remain pending.
 
 **Acceptance criteria:**
 - [ ] Trivy filesystem/dependency scan.

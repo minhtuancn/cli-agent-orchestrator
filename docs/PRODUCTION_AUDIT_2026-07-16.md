@@ -27,11 +27,14 @@ terminal WebSocket remains protected by both the source allowlist and the
   must complete in CI or with a longer timeout before a release gate is marked green.
 - Frontend TypeScript/Vite production build: pass.
 - Runtime service: `cao-server.service` active and listening on `0.0.0.0:9889`.
-- Runtime auth checks previously verified: loopback API without cookie returns 200;
-  external API without cookie returns 401; login returns 200.
+- Runtime auth checks: loopback API without cookie returns 200; external API
+  without cookie returns 401; login returns 200.
+- Public domain checks: `https://agent.go7s.net/health` returns 200, public UI
+  loads in Chromium, and unauthenticated terminal access returns 401.
 - Security scanner syntax: `bash -n scripts/security-scan.sh` passes.
-- Trivy and CodeQL were not installed, so dependency/static security scans were
-  skipped by the script.
+- Trivy is configured in `.github/workflows/ci.yml` and CodeQL is configured in
+  `.github/workflows/codeql.yml`; local binaries were not installed, so local
+  scans were skipped.
 
 ## Findings
 

@@ -72,7 +72,8 @@ python3 scripts/reconcile-sessions.py
 web-feature profiles, restarts the user service, and waits for `/health`.
 `reconcile-sessions.py` is dry-run by default and only reports stale metadata
 for sessions using the CAO prefix. Add `--apply` only after reviewing output.
-It never kills arbitrary tmux sessions.
+Use `--kill-backend` only together with `--apply` when backend teardown is
+intended. It never kills arbitrary tmux sessions.
 
 ## Browser E2E smoke tests
 
