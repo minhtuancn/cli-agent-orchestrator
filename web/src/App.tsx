@@ -1,13 +1,13 @@
-import { useEffect, useState, Suspense } from 'react'
+import { lazy, useEffect, useState, Suspense } from 'react'
 import { api } from './api'
 import { useStore } from './store'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { DashboardHome } from './components/DashboardHome'
-import { AgentPanel } from './components/AgentPanel'
-import { FlowsPanel } from './components/FlowsPanel'
-import { MemoryPanel } from './components/MemoryPanel'
-import { SettingsPanel } from './components/SettingsPanel'
-import { GuidePanel } from './components/GuidePanel'
+const AgentPanel = lazy(() => import('./components/AgentPanel').then((m) => ({ default: m.AgentPanel })))
+const FlowsPanel = lazy(() => import('./components/FlowsPanel').then((m) => ({ default: m.FlowsPanel })))
+const MemoryPanel = lazy(() => import('./components/MemoryPanel').then((m) => ({ default: m.MemoryPanel })))
+const SettingsPanel = lazy(() => import('./components/SettingsPanel').then((m) => ({ default: m.SettingsPanel })))
+const GuidePanel = lazy(() => import('./components/GuidePanel').then((m) => ({ default: m.GuidePanel })))
 import { LoginScreen } from './components/LoginScreen'
 import { useAuth } from './auth/AuthContext'
 import { useI18n, LanguageSwitcher } from './i18n'

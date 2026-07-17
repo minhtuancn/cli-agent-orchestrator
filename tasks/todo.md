@@ -17,16 +17,19 @@
       (`scripts/reconcile-sessions.py`); process kill tự động vẫn cần hardening tiếp.
 - [x] Thêm Playwright E2E smoke scaffold cho health/UI/login opt-in;
       terminal WS/reconnect/full external flow còn cần chạy trên staging/domain.
-- [ ] Sửa các cảnh báo test JSDOM còn lại (canvas/xterm) để CI log sạch.
+- [x] Sửa warning canvas/xterm của JSDOM bằng canvas stub trong test setup;
+      intentional React error-boundary logs vẫn được giữ.
 
 ## P2 — security/quality
 
 - [x] Trivy đã có trong `.github/workflows/ci.yml`.
 - [x] CodeQL Python đã thêm trong `.github/workflows/codeql.yml`.
 - [ ] Thêm secret scanning vào CI.
-- [ ] Thiết kế service token cho agent chạy multi-host.
+- [x] Thiết kế và triển khai optional `CAO_AGENT_TOKEN` cho agent multi-host;
+      authenticated WS/REST dùng `X-CAO-Agent-Token`.
 - [ ] Tăng coverage các module có coverage thấp: memory, terminal, MCP, providers.
-- [ ] Tách bundle frontend bằng dynamic import và xử lý cảnh báo chunk >500 kB.
+- [x] Tách lazy-loaded frontend panels; main chunk giảm còn khoảng 531 kB.
+- [ ] Tiếp tục code splitting vendor để main chunk dưới 500 kB.
 
 ## Đã hoàn tất trong audit gần nhất
 

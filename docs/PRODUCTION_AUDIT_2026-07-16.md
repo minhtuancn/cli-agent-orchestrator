@@ -82,14 +82,15 @@ should run both before a production release.
 ## Remaining risks / backlog
 
 1. Rotate the admin password and update the external env file.
-2. Verify NPM Proxy WebSocket upgrade from an external browser.
-3. Run the Playwright smoke suite against the real domain and add terminal
-   WebSocket/reconnect coverage.
-4. `scripts/deploy-local.sh` now automates package/UI/profile deployment; validate
+2. Run the Playwright smoke suite against the real domain with a test secret and
+   expand reconnect assertions.
+3. `scripts/deploy-local.sh` now automates package/UI/profile deployment; validate
    it from a clean checkout and CI runner.
-5. `scripts/reconcile-sessions.py` now provides safe dry-run metadata cleanup;
-   process-level orphan cleanup still needs ownership-aware hardening.
-6. Install Trivy and CodeQL and archive their results.
+4. `scripts/reconcile-sessions.py` now provides safe dry-run plus opt-in backend
+   cleanup; process ownership beyond CAO prefix remains intentionally excluded.
+5. Run the new CodeQL workflow and add secret scanning.
+6. Continue coverage work for memory, terminal, MCP and provider modules.
+7. Continue vendor splitting to reduce the main Web UI chunk below 500 kB.
 
 ## Release recommendation
 
