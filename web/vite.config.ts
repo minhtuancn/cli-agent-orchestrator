@@ -7,6 +7,17 @@ export default defineConfig({
   build: {
     outDir: '../src/cli_agent_orchestrator/web_ui',
     emptyOutDir: true,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) return 'react'
+          if (id.includes('node_modules/@xterm')) return 'xterm'
+          if (id.includes('node_modules/lucide-react')) return 'icons'
+          if (id.includes('node_modules/zustand')) return 'state'
+          return undefined
+        },
+      },
+    },
   },
   test: {
     globals: true,

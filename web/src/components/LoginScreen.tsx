@@ -41,8 +41,9 @@ export function LoginScreen() {
           <p className="text-sm text-gray-400 text-center">{t.login.subtitle}</p>
         </div>
 
-        <label className="block text-sm text-gray-400 mb-1">{t.login.password}</label>
+        <label htmlFor="admin-password" className="block text-sm text-gray-400 mb-1">{t.login.password}</label>
         <input
+          id="admin-password"
           type="password"
           autoFocus
           value={pw}
