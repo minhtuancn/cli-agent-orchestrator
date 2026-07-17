@@ -629,6 +629,7 @@ app.add_middleware(
 # the upstream posture) so internal CAO agents (cao-mcp-server) can call the
 # API without a session cookie. This mirrors is_auth_enabled() for IdP auth.
 ADMIN_PASSWORD = os.getenv("CAO_ADMIN_PASS") or ""
+AGENT_TOKEN = os.getenv("CAO_AGENT_TOKEN") or ""
 SESSION_TTL = int(os.getenv("CAO_SESSION_TTL", "86400"))  # seconds (default session)
 SESSION_TTL_REMEMBER = int(os.getenv("CAO_SESSION_TTL_REMEMBER", "2592000"))  # 30 days
 _SESSIONS: "dict[str, float]" = {}  # token -> expiry epoch
@@ -660,6 +661,17 @@ def _valid_session(token: "Optional[str]") -> bool:
 def _destroy_session(token: "Optional[str]") -> None:
     if token:
         _SESSIONS.pop(token, None)
+
+
+def _valid_agent_token(token: "Optional[str]") -> bool:
+    """Validate the optional internal-agent bearer token without logging it."""
+    return bool(AGENT_TOKEN and token and hmac.compare_digest(token, AGENT_TOKEN))
+
+
+def _request_is_authenticated(request: Request) -> bool:
+    return _valid_session(request.cookies.get("cao_sid")) or _valid_agent_token(
+        request.headers.get("x-cao-agent-token")
+    )
 
 
 def _is_secure_req(request: Request) -> bool:
@@ -695,7 +707,7 @@ class _AuthMiddleware(BaseHTTPMiddleware):
         # agent orchestration flow on localhost.
         if request.client and request.client.host in ("127.0.0.1", "::1"):
             return await call_next(request)
-        if _valid_session(request.cookies.get("cao_sid")):
+        if _request_is_authenticated(request):
             return await call_next(request)
         # Any API call without a valid session -> 401 so the SPA redirects.
         return JSONResponse(status_code=401, content={"detail": "unauthorized"})
@@ -2196,7 +2208,10 @@ async def terminal_ws(websocket: WebSocket, terminal_id: str):
     # Session auth: the IP allowlist above only restricts by source IP. Behind
     # a reverse proxy every client shares the proxy IP, so a token check is
     # required to actually gate this full-PTY endpoint.
-    if not _valid_session(websocket.cookies.get("cao_sid")):
+    if not (
+        _valid_session(websocket.cookies.get("cao_sid"))
+        or _valid_agent_token(websocket.headers.get("x-cao-agent-token"))
+    ):
         await websocket.close(code=4401, reason="Unauthorized")
         return
 

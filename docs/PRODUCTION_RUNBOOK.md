@@ -19,8 +19,10 @@ Use one public domain and one CAO port. No second public domain is required.
 - Set `CAO_ADMIN_PASS` through the external systemd environment file.
 - Browser users log in at `/auth/login` and receive the `cao_sid` cookie.
 - Internal agents call `http://127.0.0.1:9889` and use the loopback bypass.
-- Terminal WebSocket connections require both the cookie and the configured
-  `CAO_WS_ALLOWED_CLIENTS` source address.
+- Multi-host/internal agents may use `X-CAO-Agent-Token` when `CAO_AGENT_TOKEN`
+  is configured; transmit it only over HTTPS and never log or commit it.
+- Terminal WebSocket connections require a browser cookie or agent token, plus
+  the configured `CAO_WS_ALLOWED_CLIENTS` source address.
 
 ## Systemd deployment
 

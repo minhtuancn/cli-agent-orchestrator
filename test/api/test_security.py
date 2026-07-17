@@ -3,6 +3,7 @@
 import pytest
 from fastapi.testclient import TestClient
 
+from cli_agent_orchestrator.api import main as main_module
 from cli_agent_orchestrator.api.main import app
 
 client = TestClient(app)
@@ -89,6 +90,26 @@ class TestDNSRebindingProtection:
         # Note: TestClient automatically adds Host header, so we test with empty string
         response = client.get("/health", headers={"Host": ""})
         assert response.status_code == 400
+
+
+class TestAgentTokenAuthentication:
+    def test_agent_token_authenticates_protected_rest_route(self, client, monkeypatch):
+        monkeypatch.setattr(main_module, "ADMIN_PASSWORD", "admin-test")
+        monkeypatch.setattr(main_module, "AGENT_TOKEN", "test-agent-token")
+        response = client.get(
+            "/sessions",
+            headers={"X-CAO-Agent-Token": "test-agent-token"},
+        )
+        assert response.status_code != 401
+
+    def test_invalid_agent_token_is_rejected(self, client, monkeypatch):
+        monkeypatch.setattr(main_module, "ADMIN_PASSWORD", "admin-test")
+        monkeypatch.setattr(main_module, "AGENT_TOKEN", "test-agent-token")
+        response = client.get(
+            "/sessions",
+            headers={"X-CAO-Agent-Token": "wrong-token"},
+        )
+        assert response.status_code == 401
 
 
 class TestCriticalEndpointProtection:

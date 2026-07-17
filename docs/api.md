@@ -19,10 +19,16 @@ When enabled:
   `CAO_SESSION_TTL` (default 1d).
 - **Loopback bypass:** requests originating from `127.0.0.1` / `::1` are exempt
   from the session check. This lets internal CAO agents (`cao-mcp-server`) call
-  the API from localhost without a cookie, so a single auth-on server can serve
-  both the public web UI (behind a reverse proxy, login required) and the agent
-  orchestration flow (from localhost, no cookie needed). External clients are
-  still challenged.
+  the API from localhost without a cookie.
+- **Optional agent token:** when `CAO_AGENT_TOKEN` is configured, internal or
+  multi-host agents may send `X-CAO-Agent-Token`. The comparison is constant-time
+  and the token is never logged. Use HTTPS and store the token only in an
+  external secret environment file. The same token is accepted by the terminal
+  WebSocket.
+
+Together these options let one auth-on server serve the public web UI and agent
+orchestration without sharing browser cookies. External clients without a valid
+cookie or configured agent token are still challenged.
 
 ## Health Check
 
