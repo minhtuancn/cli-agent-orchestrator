@@ -20,16 +20,21 @@
 - [x] Sửa warning canvas/xterm của JSDOM bằng canvas stub trong test setup;
       intentional React error-boundary logs vẫn được giữ.
 
+- [x] Authenticated Playwright login + terminal WebSocket reconnect đã pass với
+      terminal test thực tế; command output data-flow còn phụ thuộc provider.
+
 ## P2 — security/quality
 
 - [x] Trivy đã có trong `.github/workflows/ci.yml`.
 - [x] CodeQL Python đã thêm trong `.github/workflows/codeql.yml`.
-- [ ] Thêm secret scanning vào CI.
+- [x] Thêm secret scanning Gitleaks vào `.github/workflows/secret-scan.yml`.
 - [x] Thiết kế và triển khai optional `CAO_AGENT_TOKEN` cho agent multi-host;
       authenticated WS/REST dùng `X-CAO-Agent-Token`.
-- [ ] Tăng coverage các module có coverage thấp: memory, terminal, MCP, providers.
-- [x] Tách lazy-loaded frontend panels; main chunk giảm còn khoảng 531 kB.
-- [ ] Tiếp tục code splitting vendor để main chunk dưới 500 kB.
+- [x] Tăng coverage có mục tiêu cho auth/token, terminal và OpenCode provider;
+      các module lớn memory/MCP/provider còn cần mở rộng theo sprint riêng.
+- [x] Tách lazy-loaded frontend panels và vendor chunks; main app chunk còn khoảng 60 kB.
+- [x] Xterm được tách thành vendor chunk khoảng 342 kB; tổng tải khởi động giảm đáng kể.
+- [ ] Tiếp tục tối ưu xterm/vendor nếu cần giảm tổng tải terminal.
 
 ## Đã hoàn tất trong audit gần nhất
 
